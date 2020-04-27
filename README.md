@@ -10,4 +10,7 @@ The the *u* component (east-west) of the wind for 512 longitudes, 256 latitudes,
 1. Download `era-int_pl_1981-mm-u.nc` file from this [repository](https://nextcloud.scc.kit.edu/s/cwpp3wdQPcm96jq). 
 2. Place the data file `era-int_pl_1981-mm-u.nc` in the directory `data/`.
 
+## Useful Materials
+* [How to Write a Good Git Commit Message](https://chris.beams.io/posts/git-commit/)
+
 
