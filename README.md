@@ -1,5 +1,8 @@
 # Climate-Similarity-Metrics
-Which similarity metrics are the most helpful to understand climate
+Which similarity metrics are the most helpful to understand climate? 
+
+## Goal of the Project
+Create a modular framework for analysing and understanding relationships in climate data. The moduls should allow for testing different climate indices, similarity metrics, and time-scales. The results should be interpretable by climate scientists.
 
 ## Data Description
 
