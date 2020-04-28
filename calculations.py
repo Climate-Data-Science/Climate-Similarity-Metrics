@@ -50,3 +50,40 @@ def series_similarity(map_array, referenceSeries, level, simFunct="corr"):
             sim[x,y] = similarity(referenceSeries, pointSeries)
 
     return sim
+
+
+
+def calcmean(map_array, x0, y0, step=2):
+    """
+    Calculate Mean of the value at a point and of it's surrounding values
+
+    Parameters:
+        map_array (numpy.ndarray): Map with 2dimensions - longitude, lattitude
+        x0 (int): X-Component of starting point
+        y0 (int): Y-Component of starting point
+        step (int): Radius of values that will be take into account
+
+    Returns:
+        Mean of value at starting point with surrounding points
+    """
+    return np.mean(np.array(map_array[x0 - step : x0 + step + 1, y0 - step: y0 + step + 1]))
+
+def derive_QBO(map_array, level=0):
+    """
+    Derive the QBO Index from a map
+
+    Parameters:
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, longitude, lattitude
+        level (int): Level from which the index should be derived
+
+    Returns:
+        qbo (list): QBO Index
+    """
+    x0 = int(np.round((180 - 1) * (256 / 360)))
+    y0 = int(np.round((180 + 104) * (512 / 360)))
+
+    #qbo = map_array[:, 0, x0, y0]
+
+    qbo = [calcmean(map_array[time, level, :, :], x0, y0, step=1) for time in range(len(map_array[:, level, 0, 0]))]
+
+    return qbo

@@ -14,9 +14,17 @@ The the *u* component (east-west) of the wind for 512 longitudes, 256 latitudes,
 2. Place the data file `era-int_pl_1981-mm-u.nc` in the directory `data/`.
 
 ##  Data Preprocessing
-Use the data manipulation tool cdo to extract all values for pressure level 500 with the following command:
+Use the data manipulation tool cdo to extract all values for pressure level 70 hPa with the following command:
 
-`cdo -select,level=500 era-int_pl_1979-2019-mm-u.nc era-int_pl_1979-2019-mm-l500-u.nc`
+`cdo -select,level=70 era-int_pl_1979-2019-mm-u.nc era-int_pl_1979-2019-mm-l70-u.nc`
+
+## QBO Index
+
+Values at Singapore (1N, 104E) at pressure level 70 hPa
+
+### Data from the Internet to cross check
+
+https://www.gfd-dennou.org/arch/eriko/QBO/index.html
 
 ## Useful Materials
 * [How to Write a Good Git Commit Message](https://chris.beams.io/posts/git-commit/)
