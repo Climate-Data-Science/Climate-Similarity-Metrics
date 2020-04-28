@@ -1,5 +1,5 @@
 # Climate-Similarity-Metrics
-Which similarity metrics are the most helpful to understand climate? 
+Which similarity metrics are the most helpful to understand climate?
 
 ## Goal of the Project
 Create a modular framework for analysing and understanding relationships in climate data. The moduls should allow for testing different climate indices, similarity metrics, and time-scales. The results should be interpretable by climate scientists.
@@ -10,10 +10,13 @@ The the *u* component (east-west) of the wind for 512 longitudes, 256 latitudes,
 
 ## Data Setup
 
-1. Download `era-int_pl_1981-mm-u.nc` file from this [repository](https://nextcloud.scc.kit.edu/s/cwpp3wdQPcm96jq). 
+1. Download `era-int_pl_1981-mm-u.nc` file from this [repository](https://nextcloud.scc.kit.edu/s/cwpp3wdQPcm96jq).
 2. Place the data file `era-int_pl_1981-mm-u.nc` in the directory `data/`.
+
+##  Data Preprocessing
+Use the data manipulation tool cdo to extract all values for pressure level 500 with the following command:
+
+`cdo -select,level=500 era-int_pl_1979-2019-mm-u.nc era-int_pl_1979-2019-mm-l500-u.nc`
 
 ## Useful Materials
 * [How to Write a Good Git Commit Message](https://chris.beams.io/posts/git-commit/)
-
-
