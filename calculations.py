@@ -11,7 +11,8 @@ def correlation_similarity(series1, series2):
     return np.corrcoef([series1, series2])[0, 1]
 
 SIMILAIRITY_FUNCTIONS = {
-    "correlation": correlation_similarity}
+    "correlation": correlation_similarity
+    }
 
 def calculate_pointwise_similarity(map_array, lon, lat, level, sim_func="correlation"):
     """
@@ -61,21 +62,23 @@ def calculate_series_similarity(map_array, reference_series, level, sim_func="co
     return sim
 
 
-
+"""
 def calculate_surrounding_mean(map_array, lon, lat, step=2):
-    """
+    ""
     Calculate Mean of the value at a point and of it's surrounding values
 
     Parameters:
         map_array (numpy.ndarray): Map with 2dimensions - longitude, latitude
-        x0 (int): X-Component of starting point
-        y0 (int): Y-Component of starting point
+        lon (int): X-Component of starting point
+        lat (int): Y-Component of starting point
         step (int): Radius of values that will be take into account
 
     Returns:
         Mean of value at starting point with surrounding points
-    """
+    ""
     return np.mean(np.array(map_array[lon - step : lon + step + 1, lat - step: lat + step + 1]))
+"""
+
 
 def derive_qbo(map_array, level=0):
     """
@@ -88,12 +91,12 @@ def derive_qbo(map_array, level=0):
     Returns:
         qbo (list): QBO Index
     """
-    lon = int(np.round((180 - 1) * (256 / 360)))
-    lat = int(np.round((180 + 104) * (512 / 360)))
+    #Coordinates of Singapur
+    lon = 148
+    lat = 126
 
-    #qbo = map_array[:, 0, x0, y0]
+    qbo = map_array[:, level, lon, lat]
 
-    qbo = [calculate_surrounding_mean(map_array[time, level, :, :], lon, lat, step=1)
-           for time in range(len(map_array[:, level, 0, 0]))]
+    ## TODO: Deseasonalize by subtracting monthly climatology
 
     return qbo

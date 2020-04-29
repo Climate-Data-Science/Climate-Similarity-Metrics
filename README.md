@@ -20,7 +20,7 @@ Use the data manipulation tool cdo to extract all values for pressure level 70 h
 
 ## QBO Index
 
-Values at Singapore (1N, 104E) at pressure level 70 hPa
+Values at Singapore (1N, 104E) at pressure level 70 hPa, deseasonalized by subtracting monthly climatology
 
 ### Data from the Internet to cross check
 
