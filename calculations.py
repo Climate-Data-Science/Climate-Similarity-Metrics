@@ -63,22 +63,27 @@ def calculate_series_similarity(map_array, reference_series, level, sim_func="co
     return sim
 
 
-"""
-def calculate_surrounding_mean(map_array, lon, lat, step=2):
-    ""
+
+def calculate_surrounding_mean(map_array, lon, lat, lon_step=0, lat_step=0):
+    """
     Calculate Mean of the value at a point and of it's surrounding values
 
     Parameters:
         map_array (numpy.ndarray): Map with 2dimensions - longitude, latitude
-        lon (int): X-Component of starting point
-        lat (int): Y-Component of starting point
-        step (int): Radius of values that will be take into account
+        lon (int): Longitude of starting point
+        lat (int): Latitude of starting point
+        lon_step (int): Stepsize in Longitude-dimension
+            Default: 0
+        lat_step (int): Stepsize in Latitude-dimension
+            Defaul: 0
 
     Returns:
         Mean of value at starting point with surrounding points
-    ""
-    return np.mean(np.array(map_array[lon - step : lon + step + 1, lat - step: lat + step + 1]))
-"""
+    """
+    values = np.array(map_array[lon - lon_step : lon + lon_step + 1,
+                                lat - lat_step: lat + lat_step + 1])
+    return np.mean(values)
+
 
 
 def deseasonalize_monthly_time_series(series):
@@ -101,17 +106,27 @@ def derive(map_array, lon, lat, level=0, lon_step=0, lat_step=0):
 
     Parameters:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, longitude, latitude
+        lon (int): Longitude of starting point
+        lat (int): Latitude of starting point
         level (int): Level from which the index should be derived
+            Default: 0
+        lon_step (int): Stepsize in Longitude-dimension:
+            How many points in the horizontal direction should be taken into account.
+            Default: 0
+        lat_step (int): Stepsize in Latitude-dimension:
+            How many points in the vertical direction should be taken into account.
+            Default: 0
 
     Returns:
-        qbo (list): QBO Index
+        time_series (list): List containing the mean values
+            of all values in the respective index per time
     """
-    #Coordinates of Singapur
-    lon = 148
-    lat = 126
+    len_time = map_array.shape[0]
 
-    qbo = map_array[:, level, lon, lat]
+    time_series = []
+    for time in range(len_time):
+        value = calculate_surrounding_mean(map_array[time, level, :, :],
+                                           lon, lat, lon_step, lat_step)
+        time_series.append(value)
 
-    ## TODO: Deseasonalize by subtracting monthly climatology
-
-    return qbo
+    return time_series
