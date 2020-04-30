@@ -3,6 +3,7 @@
 """
 
 import numpy as np
+from statsmodels.tsa.seasonal import STL
 
 def correlation_similarity(series1, series2):
     """
@@ -80,9 +81,23 @@ def calculate_surrounding_mean(map_array, lon, lat, step=2):
 """
 
 
-def derive_qbo(map_array, level=0):
+def deseasonalize_monthly_time_series(series):
     """
-    Derive the QBO Index from a map
+    Deseasonalize a monthly time series
+
+    Parameters:
+        series (numpy.ndarray): time series to deseasonalize
+    Returns:
+        res (numpy.ndarray): Array containing the deseasonalized data
+    """
+    stl = STL(series, period=12)
+    res = stl.fit()
+    return res.observed - res.seasonal
+
+
+def derive(map_array, lon, lat, level=0, lon_step=0, lat_step=0):
+    """
+    Derive time series for a given index from a map.
 
     Parameters:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, longitude, latitude
