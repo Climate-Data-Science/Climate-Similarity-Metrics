@@ -8,6 +8,13 @@ from statsmodels.tsa.seasonal import STL
 def correlation_similarity(series1, series2):
     """
     Calculate the Pearson correlation coefficient between 2 series
+
+    Args:
+        searies1 (numpy.ndarray): First series
+        searies2 (numpy.ndarray): Second series
+
+    Returns:
+        Pearson correlation coefficient between the two series
     """
     return np.corrcoef([series1, series2])[0, 1]
 
@@ -15,40 +22,42 @@ SIMILAIRITY_FUNCTIONS = {
     "correlation": correlation_similarity
     }
 
-def calculate_pointwise_similarity(map_array, lon, lat, level, sim_func="correlation"):
+def calculate_pointwise_similarity(map_array, lon, lat, level=0, sim_func="correlation"):
     """
     Calculate point-wise similarity of all points on a map to a reference point over time
 
-    Parameters:
+    Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, longitude, latitude
         lon (int): Longitude of reference point
         lat (int): Latitude of reference point
-        level (int): Level on which the similarity should be calculated
-        sim_func (str): The similarity function that should be used.
-            Default: Correlation Coefficient.
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+        sim_func (str, optional): The similarity function that should be used.
+            Defaults to Correlation Coefficient.
             Options: "corr": Correlation Coefficient, more will follow
 
     Returns:
-        2 dimensional array with similarity values to reference point
+        2 dimensional numpy.ndarray with similarity values to reference point
     """
     len_time = map_array.shape[0]
     reference_series = np.array([map_array[time, level, lon, lat] for time in range(len_time)])
     return calculate_series_similarity(map_array, reference_series, level, sim_func)
 
-def calculate_series_similarity(map_array, reference_series, level, sim_func="correlation"):
+def calculate_series_similarity(map_array, reference_series, level=0, sim_func="correlation"):
     """
     Calculate similarity of all points on a map to a reference series
 
-    Parameters:
+    Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, longitude, latitude
         referenceSeries (numpy.ndarray): 1 dimensional reference series
-        level (int): Level on which the similarity should be calculated
-        sim_func (str): The similarity function that should be used.
-            Default: Correlation Coefficient.
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+        sim_func (str, optional): The similarity function that should be used.
+            Defaults to Correlation Coefficient.
             Options: "corr": Correlation Coefficient, more will follow
 
     Returns:
-        sim (numpy.ndarray): 2 dimensional array with similarity values to reference point
+        2 dimensional numpy.ndarray with similarity values to reference point
     """
     similarity = SIMILAIRITY_FUNCTIONS[sim_func]
     map_array = map_array[:, level, :, :] #Eliminate level dimension
@@ -68,14 +77,14 @@ def calculate_surrounding_mean(map_array, lon, lat, lon_step=0, lat_step=0):
     """
     Calculate Mean of the value at a point and of it's surrounding values
 
-    Parameters:
+    Args:
         map_array (numpy.ndarray): Map with 2dimensions - longitude, latitude
         lon (int): Longitude of starting point
         lat (int): Latitude of starting point
-        lon_step (int): Stepsize in Longitude-dimension
-            Default: 0
-        lat_step (int): Stepsize in Latitude-dimension
-            Defaul: 0
+        lon_step (int, optional): Stepsize in Longitude-dimension
+            Defaults to 0
+        lat_step (int, optional): Stepsize in Latitude-dimension
+            Defaults to 0
 
     Returns:
         Mean of value at starting point with surrounding points
@@ -90,10 +99,10 @@ def deseasonalize_monthly_time_series(series):
     """
     Deseasonalize a monthly time series
 
-    Parameters:
+    Args:
         series (numpy.ndarray): time series to deseasonalize
     Returns:
-        res (numpy.ndarray): Array containing the deseasonalized data
+        numpy.ndarray containing the deseasonalized data
     """
     stl = STL(series, period=12)
     res = stl.fit()
@@ -104,22 +113,21 @@ def derive(map_array, lon, lat, level=0, lon_step=0, lat_step=0):
     """
     Derive time series for a given index from a map.
 
-    Parameters:
+    Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, longitude, latitude
         lon (int): Longitude of starting point
         lat (int): Latitude of starting point
-        level (int): Level from which the index should be derived
-            Default: 0
-        lon_step (int): Stepsize in Longitude-dimension:
+        level (int, optional): Level from which the index should be derived
+            Defaults to 0
+        lon_step (int, optional): Stepsize in Longitude-dimension:
             How many points in the horizontal direction should be taken into account.
-            Default: 0
-        lat_step (int): Stepsize in Latitude-dimension:
+            Defaults to 0
+        lat_step (int, optional): Stepsize in Latitude-dimension:
             How many points in the vertical direction should be taken into account.
-            Default: 0
+            Defaults to 0
 
     Returns:
-        time_series (list): List containing the mean values
-            of all values in the respective index per time
+        List containing the mean values of all values in the respective index per time
     """
     len_time = map_array.shape[0]
 
