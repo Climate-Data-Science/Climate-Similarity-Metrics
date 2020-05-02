@@ -4,23 +4,7 @@
 
 import numpy as np
 from statsmodels.tsa.seasonal import STL
-
-def correlation_similarity(series1, series2):
-    """
-    Calculate the Pearson correlation coefficient between 2 series
-
-    Args:
-        searies1 (numpy.ndarray): First series
-        searies2 (numpy.ndarray): Second series
-
-    Returns:
-        Pearson correlation coefficient between the two series
-    """
-    return np.corrcoef([series1, series2])[0, 1]
-
-SIMILAIRITY_FUNCTIONS = {
-    "correlation": correlation_similarity
-    }
+import similarity_measures
 
 def calculate_pointwise_similarity(map_array, lon, lat, level=0, sim_func="correlation"):
     """
@@ -34,7 +18,12 @@ def calculate_pointwise_similarity(map_array, lon, lat, level=0, sim_func="corre
             Defaults to 0
         sim_func (str, optional): The similarity function that should be used.
             Defaults to Correlation Coefficient.
-            Options: "corr": Correlation Coefficient, more will follow
+            Options: "correlation": Pearson's Correlation,
+                     "manhattan": Mahattan Distance,
+                     "mahalanobis": Mahalanobis Distance,
+                     "euclidean": Euclidean Distance,
+                     "cosine": Cosine Distance,
+                     "mutual_information": Mutual Information
 
     Returns:
         2 dimensional numpy.ndarray with similarity values to reference point
@@ -54,12 +43,17 @@ def calculate_series_similarity(map_array, reference_series, level=0, sim_func="
             Defaults to 0
         sim_func (str, optional): The similarity function that should be used.
             Defaults to Correlation Coefficient.
-            Options: "corr": Correlation Coefficient, more will follow
+            Options: "correlation": Pearson's Correlation,
+                     "manhattan": Mahattan Distance,
+                     "mahalanobis": Mahalanobis Distance,
+                     "euclidean": Euclidean Distance,
+                     "cosine": Cosine Distance,
+                     "mutual_information": Mutual Information
 
     Returns:
         2 dimensional numpy.ndarray with similarity values to reference point
     """
-    similarity = SIMILAIRITY_FUNCTIONS[sim_func]
+    similarity = similarity_measures.SIMILAIRITY_FUNCTIONS[sim_func]
     map_array = map_array[:, level, :, :] #Eliminate level dimension
     (len_time, len_longitude, len_latitude) = map_array.shape
     sim = np.zeros((len_longitude, len_latitude))
@@ -71,7 +65,8 @@ def calculate_series_similarity(map_array, reference_series, level=0, sim_func="
 
     return sim
 
-def calculate_series_similarity_per_period(map_array, reference_series, level=0, period_length=12, sim_func="correlation"):
+def calculate_series_similarity_per_period(map_array, reference_series, level=0,
+                                           period_length=12, sim_func="correlation"):
     """
     Calculate similarity of all points on a map to a reference series per period
 
@@ -84,17 +79,24 @@ def calculate_series_similarity_per_period(map_array, reference_series, level=0,
             Defaults to 12
         sim_func (str, optional): The similarity function that should be used.
             Defaults to Correlation Coefficient.
-            Options: "corr": Correlation Coefficient, more will follow
+            Options: "correlation": Pearson's Correlation,
+                     "manhattan": Mahattan Distance,
+                     "mahalanobis": Mahalanobis Distance,
+                     "euclidean": Euclidean Distance,
+                     "cosine": Cosine Distance,
+                     "mutual_information": Mutual Information
 
     Returns:
         List of similarity maps to reference series
     """
-    (len_time, len_longitude, len_latitude) = map_array.shape
+    len_time = map_array.shape[0]
     num_periods = int(round(len_time / period_length))
     sim = []
     for i in range(num_periods):
         period_similarity = calculate_series_similarity(map_array[i:i+period_length, :, :, :],
-                                                        reference_series[i:i+period_length], level, sim_func)
+                                                        reference_series[i:i+period_length],
+                                                        level,
+                                                        sim_func)
         sim.append(period_similarity)
     return sim
 
