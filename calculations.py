@@ -23,7 +23,9 @@ def calculate_pointwise_similarity(map_array, lon, lat, level=0, sim_func="corre
                      "mahalanobis": Mahalanobis Distance,
                      "euclidean": Euclidean Distance,
                      "cosine": Cosine Distance,
-                     "mutual_information": Mutual Information
+                     "mutual_information": Mutual Information,
+                     "transfer_entropy": Transfer Entropy,
+                     "relative_entropy": Relative Entropy
 
     Returns:
         2 dimensional numpy.ndarray with similarity values to reference point
@@ -49,6 +51,8 @@ def calculate_series_similarity(map_array, reference_series, level=0, sim_func="
                      "euclidean": Euclidean Distance,
                      "cosine": Cosine Distance,
                      "mutual_information": Mutual Information
+                     "transfer_entropy": Transfer Entropy,
+                     "relative_entropy": Relative Entropy
 
     Returns:
         2 dimensional numpy.ndarray with similarity values to reference point
@@ -85,6 +89,8 @@ def calculate_series_similarity_per_period(map_array, reference_series, level=0,
                      "euclidean": Euclidean Distance,
                      "cosine": Cosine Distance,
                      "mutual_information": Mutual Information
+                     "transfer_entropy": Transfer Entropy,
+                     "relative_entropy": Relative Entropy
 
     Returns:
         List of similarity maps to reference series
