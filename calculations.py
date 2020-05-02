@@ -71,6 +71,32 @@ def calculate_series_similarity(map_array, reference_series, level=0, sim_func="
 
     return sim
 
+def calculate_series_similarity_per_period(map_array, reference_series, level=0, period_length=12, sim_func="correlation"):
+    """
+    Calculate similarity of all points on a map to a reference series per period
+
+    Args:
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, longitude, latitude
+        referenceSeries (numpy.ndarray): 1 dimensional reference series
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+        period_length(int, optional): Length of one period
+            Defaults to 12
+        sim_func (str, optional): The similarity function that should be used.
+            Defaults to Correlation Coefficient.
+            Options: "corr": Correlation Coefficient, more will follow
+
+    Returns:
+        List of similarity maps to reference series
+    """
+    (len_time, len_longitude, len_latitude) = map_array.shape
+    num_periods = int(round(len_time / period_length))
+    sim = []
+    for i in range(num_periods):
+        period_similarity = calculate_series_similarity(map_array[i:i+period_length, :, :, :],
+                                                        reference_series[i:i+period_length], level, sim_func)
+        sim.append(period_similarity)
+    return sim
 
 
 def calculate_surrounding_mean(map_array, lon, lat, lon_step=0, lat_step=0):
