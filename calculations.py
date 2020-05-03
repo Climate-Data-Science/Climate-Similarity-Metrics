@@ -57,7 +57,7 @@ def calculate_series_similarity(map_array, reference_series, level=0, sim_func="
     Returns:
         2 dimensional numpy.ndarray with similarity values to reference point
     """
-    similarity = similarity_measures.SIMILAIRITY_FUNCTIONS[sim_func]
+    similarity = similarity_measures.SIMILARITY_FUNCTIONS[sim_func]
     map_array = map_array[:, level, :, :] #Eliminate level dimension
     (len_time, len_longitude, len_latitude) = map_array.shape
     sim = np.zeros((len_longitude, len_latitude))
