@@ -3,8 +3,9 @@ Module containing different similarity measures for time series
 """
 import numpy as np
 import scipy.spatial.distance as sc
-import pyinform
-import similaritymeasures
+import pyinform # pylint: disable=E0401
+import similaritymeasures # pylint: disable=E0401
+from sklearn.decomposition import PCA # pylint: disable=E0401
 
 def correlation_similarity(series1, series2):
     """
@@ -36,7 +37,7 @@ def manhattan_similarity(series1, series2):
     """
     return sc.cityblock(series1, series2)
 
-def mahalanobis_similarity(series1, series2):
+def mahalanobis_similarity(series1, series2): # pylint: disable=W0613
     """
     Compute the Mahanalobis distance coefficient between two series
 
@@ -50,7 +51,7 @@ def mahalanobis_similarity(series1, series2):
     Returns:
         Mahalanobis distance between the two series
     """
-    #TODO Implement Mahalanobis Distance
+    #TODO Implement Mahalanobis Distance # pylint: disable=W0511
     return 0
 
 
@@ -157,29 +158,49 @@ def dynamic_time_warping_distance(series1, series2):
     Returns:
         Dynamic time warping distance between the two series
     """
-    series1_2d = np.array([series1, range(len(series1))])
-    series2_2d = np.array([series2, range(len(series2))])
+    series1_2d = np.zeros((len(series1), 2))
+    series1_2d[:, 0] = range(len(series1))
+    series1_2d[:, 1] = series1
+
+    series2_2d = np.zeros((len(series2), 2))
+    series2_2d[:, 0] = range(len(series2))
+    series2_2d[:, 1] = series2
+
     return similaritymeasures.dtw(series1_2d, series2_2d)[0]
 
-def  principal_component_distance(series1, series2):
+def  principal_component_distance(series1, series2, k=2):
     """
-    Compute the Principal Component distance between two series
+    Compute the distance of the first k principal components between two series
 
-    Quantifies the difference between time series PCs that explain
-    the majority of the variance.
+    Computes the difference between time series mapped into the first k PCs that
+    explain the majority of the variance.
 
     Args:
         series1 (numpy.ndarray): First series
         series2 (numpy.ndarray): Second series
+        k (int): Number of Principal Components
+            Defaults to 2
 
     Returns:
-        Principal Component distance between the two series
+        Distance of values mapped into the first k principal components
     """
-    ## TODO: Implement PCA
+    series1_2d = np.zeros((len(series1), 2))
+    series1_2d[:, 0] = range(len(series1))
+    series1_2d[:, 1] = series1
+
+    series2_2d = np.zeros((len(series2), 2))
+    series2_2d[:, 0] = range(len(series2))
+    series2_2d[:, 1] = series2
+
+    pca1 = PCA().fit_transform(series1_2d)
+    pca2 = PCA().fit_transform(series2_2d)
+
+    distance = np.sqrt(np.sum(np.square(pca1[:, :k] - pca2[:, :k])))
+    return distance
 
 def shift_to_positive(series):
     """
-    Shifts a series by adding the biggest negative value so all values are greater 0
+    Shift a series by adding the biggest negative value so all values are greater 0
 
     Args:
         series (numpy.ndarray): Series to shift
@@ -189,8 +210,22 @@ def shift_to_positive(series):
     """
     if min(series) >= 0:
         return series #No need to shift
-    else:
-        return series - min(series)
+    return series - min(series)
+
+def normalize(series):
+    """
+    Normalize time series
+
+    Args:
+        series (np.ndarray): Time series to normalize
+
+    Returns:
+        Normalized time series
+    """
+    norm = np.linalg.norm(series)
+    if norm == 0:
+        return series
+    return series / norm
 
 SIMILARITY_FUNCTIONS = {
     "correlation": correlation_similarity,

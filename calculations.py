@@ -3,7 +3,7 @@
 """
 
 import numpy as np
-from statsmodels.tsa.seasonal import STL
+from statsmodels.tsa.seasonal import STL # pylint: disable=E0401
 import similarity_measures
 
 def calculate_pointwise_similarity(map_array, lon, lat, level=0, sim_func="correlation"):
@@ -143,7 +143,7 @@ def deseasonalize_monthly_time_series(series):
     return res.observed - res.seasonal
 
 
-def derive(map_array, lon, lat, level=0, lon_step=0, lat_step=0):
+def derive(map_array, lon, lat, level=0, lon_step=0, lat_step=0): # pylint: disable=R0913
     """
     Derive time series for a given index from a map.
 
