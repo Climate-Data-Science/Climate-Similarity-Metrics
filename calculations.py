@@ -77,8 +77,10 @@ def calculate_series_similarity_per_period(map_array, reference_series,
     num_periods = int(round(len_time / period_length))
     sim = []
     for i in range(num_periods):
-        period_similarity = calculate_series_similarity(map_array[i:i+period_length, :, :, :],
-                                                        reference_series[i:i+period_length],
+        start = i * period_length
+        end = start + period_length
+        period_similarity = calculate_series_similarity(map_array[start:end, :, :, :],
+                                                        reference_series[start:end],
                                                         level,
                                                         sim_func)
         sim.append(period_similarity)
@@ -106,19 +108,40 @@ def calculate_surrounding_mean(map_array, lon, lat, lon_step=0, lat_step=0):
     return np.mean(values)
 
 
-
-def deseasonalize_monthly_time_series(series):
+def deseasonalize_time_series(series, period_length=12):
     """
-    Deseasonalize a monthly time series
+    Deseasonalize a time series by subtracting the respective mean and dividing by the respective
+    standard deviation.
+
+    For example: Monthly time series. From each value, subtract the alltime mean for this month and
+    divide by the alltime standard deviation for this month.
+
+    If the length of the series is no multiple of the period length, values from behind will be
+    dropped until this condition is met.
 
     Args:
-        series (numpy.ndarray): time series to deseasonalize
+        series (np.ndarray): time series to deseasonalize
+        period_length (int): length of one period
+            Defaults to 12
+
     Returns:
-        numpy.ndarray containing the deseasonalized data
+        Deseasonalize time series
     """
-    stl = STL(series, period=12)
-    res = stl.fit()
-    return res.observed - res.seasonal
+    period_mean = np.zeros(period_length)
+    period_std = np.zeros(period_length)
+
+    len_time = len(series)
+    num_periods = int(np.floor(len_time / period_length))
+
+    for i in range(period_length):
+        period_mean[i] = np.mean(np.array([series[j * period_length + i] for j in range(num_periods)]))
+        period_std[i] = np.std(np.array([series[j * period_length + i] for j in range(num_periods)]))
+
+    #Cut off last values that prevent series from having length that is a multiple of period_length
+    series_short = series[:num_periods*period_length]
+
+    normalized_series = [(series_short[k] - period_mean[k % period_length]) / period_std[k % period_length] for k in range(len(series_short))]
+    return normalized_series
 
 
 def derive(map_array, lon, lat, level=0, lon_step=0, lat_step=0): # pylint: disable=R0913
