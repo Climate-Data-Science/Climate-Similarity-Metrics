@@ -21,7 +21,12 @@ Use the data manipulation tool cdo to extract all values for pressure level 70 h
 ## Environment Setup
 
 Create a new conda environment with all the required dependencies:
+
 `conda env create -f environment.yaml`
+
+Activate the environment:
+
+`conda activate climate_similarity_measures`
 
 ## QBO Index
 
