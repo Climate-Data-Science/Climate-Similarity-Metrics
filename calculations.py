@@ -6,7 +6,8 @@ import numpy as np
 from statsmodels.tsa.seasonal import STL # pylint: disable=E0401
 import similarity_measures
 
-def calculate_pointwise_similarity(map_array, lon, lat, level=0, sim_func="correlation"):
+def calculate_pointwise_similarity(map_array, lon, lat, level=0,
+                                   sim_func=similarity_measures.correlation_similarity):
     """
     Calculate point-wise similarity of all points on a map to a reference point over time
 
@@ -17,15 +18,7 @@ def calculate_pointwise_similarity(map_array, lon, lat, level=0, sim_func="corre
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
         sim_func (str, optional): The similarity function that should be used.
-            Defaults to Correlation Coefficient.
-            Options: "correlation": Pearson's Correlation,
-                     "manhattan": Mahattan Distance,
-                     "mahalanobis": Mahalanobis Distance,
-                     "euclidean": Euclidean Distance,
-                     "cosine": Cosine Distance,
-                     "mutual_information": Mutual Information,
-                     "transfer_entropy": Transfer Entropy,
-                     "relative_entropy": Relative Entropy
+            Defaults to Pearson's Correlation Coefficient.
 
     Returns:
         2 dimensional numpy.ndarray with similarity values to reference point
@@ -34,7 +27,8 @@ def calculate_pointwise_similarity(map_array, lon, lat, level=0, sim_func="corre
     reference_series = np.array([map_array[time, level, lon, lat] for time in range(len_time)])
     return calculate_series_similarity(map_array, reference_series, level, sim_func)
 
-def calculate_series_similarity(map_array, reference_series, level=0, sim_func="correlation"):
+def calculate_series_similarity(map_array, reference_series, level=0,
+                                sim_func=similarity_measures.correlation_similarity):
     """
     Calculate similarity of all points on a map to a reference series
 
@@ -44,20 +38,11 @@ def calculate_series_similarity(map_array, reference_series, level=0, sim_func="
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
         sim_func (str, optional): The similarity function that should be used.
-            Defaults to Correlation Coefficient.
-            Options: "correlation": Pearson's Correlation,
-                     "manhattan": Mahattan Distance,
-                     "mahalanobis": Mahalanobis Distance,
-                     "euclidean": Euclidean Distance,
-                     "cosine": Cosine Distance,
-                     "mutual_information": Mutual Information
-                     "transfer_entropy": Transfer Entropy,
-                     "relative_entropy": Relative Entropy
+            Defaults to Pearon's Correlation Coefficient.
 
     Returns:
         2 dimensional numpy.ndarray with similarity values to reference point
     """
-    similarity = similarity_measures.SIMILARITY_FUNCTIONS[sim_func]
     map_array = map_array[:, level, :, :] #Eliminate level dimension
     (len_time, len_longitude, len_latitude) = map_array.shape
     sim = np.zeros((len_longitude, len_latitude))
@@ -65,12 +50,13 @@ def calculate_series_similarity(map_array, reference_series, level=0, sim_func="
     for lon_i in range(len_longitude):
         for lat_i in range(len_latitude):
             point_series = np.array([map_array[time, lon_i, lat_i] for time in range(len_time)])
-            sim[lon_i, lat_i] = similarity(reference_series, point_series)
+            sim[lon_i, lat_i] = sim_func(reference_series, point_series)
 
     return sim
 
-def calculate_series_similarity_per_period(map_array, reference_series, level=0,
-                                           period_length=12, sim_func="correlation"):
+def calculate_series_similarity_per_period(map_array, reference_series,
+                                           level=0, period_length=12,
+                                           sim_func=similarity_measures.correlation_similarity):
     """
     Calculate similarity of all points on a map to a reference series per period
 
@@ -82,15 +68,7 @@ def calculate_series_similarity_per_period(map_array, reference_series, level=0,
         period_length(int, optional): Length of one period
             Defaults to 12
         sim_func (str, optional): The similarity function that should be used.
-            Defaults to Correlation Coefficient.
-            Options: "correlation": Pearson's Correlation,
-                     "manhattan": Mahattan Distance,
-                     "mahalanobis": Mahalanobis Distance,
-                     "euclidean": Euclidean Distance,
-                     "cosine": Cosine Distance,
-                     "mutual_information": Mutual Information
-                     "transfer_entropy": Transfer Entropy,
-                     "relative_entropy": Relative Entropy
+            Defaults to Pearson's Correlation Coefficient.
 
     Returns:
         List of similarity maps to reference series

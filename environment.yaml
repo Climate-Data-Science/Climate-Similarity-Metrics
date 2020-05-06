@@ -103,6 +103,7 @@ dependencies:
   - zipp=3.1.0=py_0
   - zlib=1.2.11=h62dcd97_4
   - pip:
+    - joblib==0.14.1
     - patsy==0.5.1
     - pyinform==0.2.0
     - scikit-learn==0.22.2.post1

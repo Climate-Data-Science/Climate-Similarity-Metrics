@@ -226,16 +226,3 @@ def normalize(series):
     if norm == 0:
         return series
     return series / norm
-
-SIMILARITY_FUNCTIONS = {
-    "correlation": correlation_similarity,
-    "manhattan": manhattan_similarity,
-    "mahalanobis": mahalanobis_similarity,
-    "euclidean": euclidean_similarity,
-    "cosine": cosine_similarity,
-    "mutual_information": mutual_information,
-    "transfer_entropy": transfer_entropy,
-    "conditional_entropy": conditional_entropy,
-    "dtw": dynamic_time_warping_distance,
-    "pca": principal_component_distance,
-    }
