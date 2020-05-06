@@ -3,7 +3,6 @@
 """
 
 import numpy as np
-from statsmodels.tsa.seasonal import STL # pylint: disable=E0401
 import similarity_measures
 
 def calculate_pointwise_similarity(map_array, lon, lat, level=0,
@@ -173,3 +172,22 @@ def derive(map_array, lon, lat, level=0, lon_step=0, lat_step=0): # pylint: disa
         time_series.append(value)
 
     return time_series
+
+def convert_coordinates_to_grid(geo_coordinates, value):
+    """
+    Converts geographical coordinates into indices for values stored in an N128 Gaussian Grid system
+
+    Args:
+        geo_coordinates (List): List containing the meaning of the indices expressed in geographical coordinates
+        value (int): Coordinate to convert
+
+    Returns:
+        Indice for the respective geographical coordinate
+    """
+    tolerance = 0.1
+    while len(np.where((geo_coordinates < value + tolerance) & (geo_coordinates > value - tolerance))[0]) == 0:
+        tolerance += 0.1
+
+    gridpoint = np.where((geo_coordinates < value + tolerance) & (geo_coordinates > value - tolerance))[0][0]
+
+    return gridpoint
