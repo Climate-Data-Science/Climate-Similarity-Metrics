@@ -18,7 +18,7 @@ Use the data manipulation tool cdo to extract all values for pressure level 70 h
 
 `cdo -select,level=70 era-int_pl_1979-2019-mm-u.nc era-int_pl_1979-2019-mm-l70-u.nc`
 
-##Environment Setup
+## Environment Setup
 
 Create a new conda environment with all the required dependencies:
 `conda env create -f environment.yaml`
