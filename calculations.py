@@ -59,6 +59,9 @@ def calculate_series_similarity_per_period(map_array, reference_series,
     """
     Calculate similarity of all points on a map to a reference series per period
 
+    If the length of the series is no multiple of the period length, values from behind will be
+    dropped until this condition is met.
+
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, longitude, latitude
         referenceSeries (numpy.ndarray): 1 dimensional reference series
@@ -73,7 +76,7 @@ def calculate_series_similarity_per_period(map_array, reference_series,
         List of similarity maps to reference series
     """
     len_time = map_array.shape[0]
-    num_periods = int(round(len_time / period_length))
+    num_periods = int(np.floor(len_time / period_length))
     sim = []
     for i in range(num_periods):
         start = i * period_length
