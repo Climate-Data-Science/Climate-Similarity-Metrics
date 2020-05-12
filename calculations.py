@@ -26,6 +26,7 @@ def calculate_pointwise_similarity(map_array, lat, lon, level=0,
     reference_series = np.array([map_array[time, level, lat, lon] for time in range(len_time)])
     return calculate_series_similarity(map_array, reference_series, level, sim_func)
 
+
 def calculate_series_similarity(map_array, reference_series, level=0,
                                 sim_func=similarity_measures.correlation_similarity):
     """
@@ -52,6 +53,7 @@ def calculate_series_similarity(map_array, reference_series, level=0,
             sim[lat_i, lon_i] = sim_func(reference_series, point_series)
 
     return sim
+
 
 def calculate_series_similarity_per_period(map_array, reference_series,
                                            level=0, period_length=12,
@@ -110,6 +112,41 @@ def calculate_surrounding_mean(map_array, lat, lon, lat_step=0, lon_step=0):
     return np.mean(values)
 
 
+def deseasonalize_map(map_array, period_length=12):
+    """
+    Deseasonalize every data point of a map by subtracting the respective mean and dividing by
+    the respective standard deviation.
+
+    For example: Monthly (period_length = 12). From each value, subtract the alltime mean for this month and
+    divide by the alltime standard deviation for this month.
+
+    If the length of the time dimension is no multiple of the period length, values from behind will be
+    dropped until this condition is met.
+
+    Args:
+        map_array (np.ndarray): Map with 4 dimensions - time, level, latitude, longitude
+        period_length (int): length of one period
+            Defaults to 12
+
+    Returns:
+        Deseasonalized map
+    """
+    (len_time, len_level, len_latitude, len_longitude) = map_array.shape
+    num_periods = int(np.floor(len_time / period_length))
+
+    deseasonalized_map = np.zeros((num_periods * period_length, len_level, len_latitude, len_longitude))
+
+    #Convert every data point to time series and deseasonalize it
+    for level in range(len_level):
+        for lat in range(len_latitude):
+            for lon in range(len_longitude):
+                time_series = map_array[:, level, lat, lon]
+                deseasonalized_series = deseasonalize_time_series(time_series, period_length)
+                deseasonalized_map[:, level, lat, lon] = deseasonalized_series
+
+    return deseasonalized_map
+
+
 def deseasonalize_time_series(series, period_length=12):
     """
     Deseasonalize a time series by subtracting the respective mean and dividing by the respective
@@ -127,7 +164,7 @@ def deseasonalize_time_series(series, period_length=12):
             Defaults to 12
 
     Returns:
-        Deseasonalize time series
+        Deseasonalized time series
     """
     period_mean = np.zeros(period_length)
     period_std = np.zeros(period_length)
@@ -175,6 +212,7 @@ def derive(map_array, lat, lon, level=0, lat_step=0, lon_step=0): # pylint: disa
         time_series.append(value)
 
     return time_series
+
 
 def convert_coordinates_to_grid(geo_coordinates, value):
     """

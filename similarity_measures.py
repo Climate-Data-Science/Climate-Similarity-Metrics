@@ -54,7 +54,6 @@ def mahalanobis_similarity(series1, series2): # pylint: disable=W0613
     #TODO Implement Mahalanobis Distance # pylint: disable=W0511
     return 0
 
-
 def euclidean_similarity(series1, series2):
     """
     Compute the Euclidean distance between two series
