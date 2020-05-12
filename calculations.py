@@ -117,11 +117,11 @@ def deseasonalize_map(map_array, period_length=12):
     Deseasonalize every data point of a map by subtracting the respective mean and dividing by
     the respective standard deviation.
 
-    For example: Monthly (period_length = 12). From each value, subtract the alltime mean for this month and
-    divide by the alltime standard deviation for this month.
+    For example: Monthly (period_length = 12). From each value, subtract the alltime
+    mean for this month and divide by the alltime standard deviation for this month.
 
-    If the length of the time dimension is no multiple of the period length, values from behind will be
-    dropped until this condition is met.
+    If the length of the time dimension is no multiple of the period length, values from behind
+    will be dropped until this condition is met.
 
     Args:
         map_array (np.ndarray): Map with 4 dimensions - time, level, latitude, longitude
@@ -134,7 +134,8 @@ def deseasonalize_map(map_array, period_length=12):
     (len_time, len_level, len_latitude, len_longitude) = map_array.shape
     num_periods = int(np.floor(len_time / period_length))
 
-    deseasonalized_map = np.zeros((num_periods * period_length, len_level, len_latitude, len_longitude))
+    deseasonalized_map = np.zeros((num_periods * period_length, len_level,
+                                   len_latitude, len_longitude))
 
     #Convert every data point to time series and deseasonalize it
     for level in range(len_level):
@@ -173,13 +174,16 @@ def deseasonalize_time_series(series, period_length=12):
     num_periods = int(np.floor(len_time / period_length))
 
     for i in range(period_length):
-        period_mean[i] = np.mean(np.array([series[j * period_length + i] for j in range(num_periods)]))
-        period_std[i] = np.std(np.array([series[j * period_length + i] for j in range(num_periods)]))
+        period_mean[i] = np.mean(np.array([series[j * period_length + i]
+                                           for j in range(num_periods)]))
+        period_std[i] = np.std(np.array([series[j * period_length + i]
+                                         for j in range(num_periods)]))
 
     #Cut off last values that prevent series from having length that is a multiple of period_length
     series_short = series[:num_periods*period_length]
 
-    normalized_series = [(series_short[k] - period_mean[k % period_length]) / period_std[k % period_length] for k in range(len(series_short))]
+    normalized_series = [(series_short[k] - period_mean[k % period_length])
+                         / period_std[k % period_length] for k in range(len(series_short))]
     return normalized_series
 
 
@@ -219,16 +223,19 @@ def convert_coordinates_to_grid(geo_coordinates, value):
     Converts geographical coordinates into indices for values stored in an N128 Gaussian Grid system
 
     Args:
-        geo_coordinates (List): List containing the meaning of the indices expressed in geographical coordinates
+        geo_coordinates (List): List containing the meaning of the indices expressed
+                                in geographical coordinates
         value (int): Coordinate to convert
 
     Returns:
         Indice for the respective geographical coordinate
     """
     tolerance = 0.1
-    while len(np.where((geo_coordinates < value + tolerance) & (geo_coordinates > value - tolerance))[0]) == 0:
+    while len(np.where((geo_coordinates < value + tolerance) &
+                       (geo_coordinates > value - tolerance))[0]) == 0:
         tolerance += 0.1
 
-    gridpoint = np.where((geo_coordinates < value + tolerance) & (geo_coordinates > value - tolerance))[0][0]
+    gridpoint = np.where((geo_coordinates < value + tolerance) &
+                         (geo_coordinates > value - tolerance))[0][0]
 
     return gridpoint
