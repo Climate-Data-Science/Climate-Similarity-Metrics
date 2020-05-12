@@ -5,15 +5,15 @@
 import numpy as np
 import similarity_measures
 
-def calculate_pointwise_similarity(map_array, lon, lat, level=0,
+def calculate_pointwise_similarity(map_array, lat, lon, level=0,
                                    sim_func=similarity_measures.correlation_similarity):
     """
     Calculate point-wise similarity of all points on a map to a reference point over time
 
     Args:
-        map_array (numpy.ndarray): Map with 4 dimensions - time, level, longitude, latitude
-        lon (int): Longitude of reference point
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         lat (int): Latitude of reference point
+        lon (int): Longitude of reference point
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
         sim_func (str, optional): The similarity function that should be used.
@@ -23,7 +23,7 @@ def calculate_pointwise_similarity(map_array, lon, lat, level=0,
         2 dimensional numpy.ndarray with similarity values to reference point
     """
     len_time = map_array.shape[0]
-    reference_series = np.array([map_array[time, level, lon, lat] for time in range(len_time)])
+    reference_series = np.array([map_array[time, level, lat, lon] for time in range(len_time)])
     return calculate_series_similarity(map_array, reference_series, level, sim_func)
 
 def calculate_series_similarity(map_array, reference_series, level=0,
@@ -32,7 +32,7 @@ def calculate_series_similarity(map_array, reference_series, level=0,
     Calculate similarity of all points on a map to a reference series
 
     Args:
-        map_array (numpy.ndarray): Map with 4 dimensions - time, level, longitude, latitude
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         referenceSeries (numpy.ndarray): 1 dimensional reference series
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
@@ -43,13 +43,13 @@ def calculate_series_similarity(map_array, reference_series, level=0,
         2 dimensional numpy.ndarray with similarity values to reference point
     """
     map_array = map_array[:, level, :, :] #Eliminate level dimension
-    (len_time, len_longitude, len_latitude) = map_array.shape
-    sim = np.zeros((len_longitude, len_latitude))
+    (len_time, len_latitude, len_longitude) = map_array.shape
+    sim = np.zeros((len_latitude, len_longitude))
 
-    for lon_i in range(len_longitude):
-        for lat_i in range(len_latitude):
-            point_series = np.array([map_array[time, lon_i, lat_i] for time in range(len_time)])
-            sim[lon_i, lat_i] = sim_func(reference_series, point_series)
+    for lat_i in range(len_latitude):
+        for lon_i in range(len_longitude):
+            point_series = np.array([map_array[time, lat_i, lon_i] for time in range(len_time)])
+            sim[lat_i, lon_i] = sim_func(reference_series, point_series)
 
     return sim
 
@@ -63,7 +63,7 @@ def calculate_series_similarity_per_period(map_array, reference_series,
     dropped until this condition is met.
 
     Args:
-        map_array (numpy.ndarray): Map with 4 dimensions - time, level, longitude, latitude
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         referenceSeries (numpy.ndarray): 1 dimensional reference series
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
@@ -89,24 +89,24 @@ def calculate_series_similarity_per_period(map_array, reference_series,
     return sim
 
 
-def calculate_surrounding_mean(map_array, lon, lat, lon_step=0, lat_step=0):
+def calculate_surrounding_mean(map_array, lat, lon, lat_step=0, lon_step=0):
     """
     Calculate Mean of the value at a point and of it's surrounding values
 
     Args:
-        map_array (numpy.ndarray): Map with 2dimensions - longitude, latitude
-        lon (int): Longitude of starting point
+        map_array (numpy.ndarray): Map with 2dimensions - latitude, longitude
         lat (int): Latitude of starting point
-        lon_step (int, optional): Stepsize in Longitude-dimension
-            Defaults to 0
+        lon (int): Longitude of starting point
         lat_step (int, optional): Stepsize in Latitude-dimension
+            Defaults to 0
+        lon_step (int, optional): Stepsize in Longitude-dimension
             Defaults to 0
 
     Returns:
         Mean of value at starting point with surrounding points
     """
-    values = np.array(map_array[lon - lon_step : lon + lon_step + 1,
-                                lat - lat_step: lat + lat_step + 1])
+    values = np.array(map_array[lat - lat_step: lat + lat_step + 1,
+                                lon - lon_step: lon + lon_step + 1])
     return np.mean(values)
 
 
@@ -146,21 +146,21 @@ def deseasonalize_time_series(series, period_length=12):
     return normalized_series
 
 
-def derive(map_array, lon, lat, level=0, lon_step=0, lat_step=0): # pylint: disable=R0913
+def derive(map_array, lat, lon, level=0, lat_step=0, lon_step=0): # pylint: disable=R0913
     """
     Derive time series for a given index from a map.
 
     Args:
-        map_array (numpy.ndarray): Map with 4 dimensions - time, level, longitude, latitude
-        lon (int): Longitude of starting point
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         lat (int): Latitude of starting point
+        lon (int): Longitude of starting point
         level (int, optional): Level from which the index should be derived
-            Defaults to 0
-        lon_step (int, optional): Stepsize in Longitude-dimension:
-            How many points in the horizontal direction should be taken into account.
             Defaults to 0
         lat_step (int, optional): Stepsize in Latitude-dimension:
             How many points in the vertical direction should be taken into account.
+            Defaults to 0
+        lon_step (int, optional): Stepsize in Longitude-dimension:
+            How many points in the horizontal direction should be taken into account.
             Defaults to 0
 
     Returns:
@@ -171,7 +171,7 @@ def derive(map_array, lon, lat, level=0, lon_step=0, lat_step=0): # pylint: disa
     time_series = []
     for time in range(len_time):
         value = calculate_surrounding_mean(map_array[time, level, :, :],
-                                           lon, lat, lon_step, lat_step)
+                                           lat, lon, lat_step, lon_step)
         time_series.append(value)
 
     return time_series
