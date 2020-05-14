@@ -47,10 +47,7 @@ def calculate_series_similarity(map_array, reference_series, level=0,
     (len_time, len_latitude, len_longitude) = map_array.shape
     sim = np.zeros((len_latitude, len_longitude))
 
-    for lat_i in range(len_latitude):
-        for lon_i in range(len_longitude):
-            point_series = np.array([map_array[time, lat_i, lon_i] for time in range(len_time)])
-            sim[lat_i, lon_i] = sim_func(reference_series, point_series)
+    sim = np.apply_along_axis((lambda x : sim_func(reference_series, x)), 0, map_array)
 
     return sim
 
