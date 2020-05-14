@@ -131,18 +131,14 @@ def deseasonalize_map(map_array, period_length=12):
     (len_time, len_level, len_latitude, len_longitude) = map_array.shape
     num_periods = int(np.floor(len_time / period_length))
 
-    deseasonalized_map = np.zeros((num_periods * period_length, len_level,
-                                   len_latitude, len_longitude))
+    reshaped_map_array = map_array[:num_periods * period_length, :, :, :].reshape(num_periods, period_length, len_level, len_latitude, len_longitude)
 
-    #Convert every data point to time series and deseasonalize it
-    for level in range(len_level):
-        for lat in range(len_latitude):
-            for lon in range(len_longitude):
-                time_series = map_array[:, level, lat, lon]
-                deseasonalized_series = deseasonalize_time_series(time_series, period_length)
-                deseasonalized_map[:, level, lat, lon] = deseasonalized_series
+    period_mean = np.mean(reshaped_map_array, axis=0)
+    period_std = np.std(reshaped_map_array, axis=0)
 
-    return deseasonalized_map
+    deseasonalized_map = (reshaped_map_array - period_mean) / period_std
+
+    return deseasonalized_map.reshape(num_periods * period_length, len_level, len_latitude, len_longitude)
 
 
 def deseasonalize_time_series(series, period_length=12):
