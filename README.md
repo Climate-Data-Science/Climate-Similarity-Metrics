@@ -41,7 +41,7 @@ Values at Singapore (1N, 104E) at pressure level 70 hPa, deseasonalized by subtr
 
 ### 2nd Possibility
 
-Values at +- 5°north and south of the equator at pressure level 50 to 30 hPa
+Values at +- 5°north and south of the equator at pressure level 30 hPa
 
 ### Data from the Internet to cross check
 
