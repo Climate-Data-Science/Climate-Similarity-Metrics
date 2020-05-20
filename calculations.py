@@ -3,6 +3,8 @@
 """
 
 import numpy as np
+from joblib import Parallel, delayed
+
 import similarity_measures
 
 def calculate_pointwise_similarity(map_array, lat, lon, level=0,
@@ -44,13 +46,14 @@ def calculate_series_similarity(map_array, reference_series, level=0,
         2 dimensional numpy.ndarray with similarity values to reference point
     """
     map_array = map_array[:, level, :, :] #Eliminate level dimension
-    (len_time, len_latitude, len_longitude) = map_array.shape
+    (len_latitude, len_longitude) = map_array.shape[1:]
     sim = np.zeros((len_latitude, len_longitude))
 
-    sim = np.apply_along_axis((lambda x : sim_func(reference_series, x)), 0, map_array)
+    sim = Parallel(n_jobs=-1)(delayed(sim_func)(reference_series, map_array[:, lat, lon])
+                              for lat in range(len_latitude)
+                              for lon in range(len_longitude))
 
-    return sim
-
+    return np.array(sim).reshape(len_latitude, len_longitude)
 
 def calculate_series_similarity_per_period(map_array, reference_series,
                                            level=0, period_length=12,
@@ -131,14 +134,21 @@ def deseasonalize_map(map_array, period_length=12):
     (len_time, len_level, len_latitude, len_longitude) = map_array.shape
     num_periods = int(np.floor(len_time / period_length))
 
-    reshaped_map_array = map_array[:num_periods * period_length, :, :, :].reshape(num_periods, period_length, len_level, len_latitude, len_longitude)
+    reshaped_map_array = map_array[:num_periods * period_length, :, :, :].reshape(num_periods,
+                                                                                  period_length,
+                                                                                  len_level,
+                                                                                  len_latitude,
+                                                                                  len_longitude)
 
     period_mean = np.mean(reshaped_map_array, axis=0)
     period_std = np.std(reshaped_map_array, axis=0)
 
     deseasonalized_map = (reshaped_map_array - period_mean) / period_std
 
-    return deseasonalized_map.reshape(num_periods * period_length, len_level, len_latitude, len_longitude)
+    return deseasonalized_map.reshape(num_periods * period_length,
+                                      len_level,
+                                      len_latitude,
+                                      len_longitude)
 
 
 def deseasonalize_time_series(series, period_length=12):
