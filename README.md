@@ -15,11 +15,7 @@ The the *u* component (east-west) of the wind for 512 longitudes, 256 latitudes,
 3. Use `era-int_pl_1979-2019-mm-u.nc` file from this [repository](https://nextcloud.scc.kit.edu/s/cwpp3wdQPcm96jq) for the "Data Preprocessing" step
 
 ##  Data Preprocessing
-Use the data manipulation tool cdo to extract all values for pressure level 70 hPa with the following command:
-
-`cdo -select,level=70 era-int_pl_1979-2019-mm-u.nc era-int_pl_1979-2019-mm-l70-u.nc`
-
-To extract all values for pressure level 30 hPa use the following command:
+Use the data manipulation tool cdo to extract all values for pressure level 30 hPa with the following command:
 
 `cdo -select,level=30 era-int_pl_1979-2019-mm-u.nc era-int_pl_1979-2019-mm-l30-u.nc`
 
@@ -37,7 +33,7 @@ Activate the environment:
 
 ### 1st Possibility
 
-Values at Singapore (1N, 104E) at pressure level 70 hPa, deseasonalized by subtracting monthly climatology
+Values at Singapore (1N, 104E) at pressure level 30 hPa
 
 ### 2nd Possibility
 
@@ -45,7 +41,15 @@ Values at +- 5°north and south of the equator at pressure level 30 hPa
 
 ### Data from the Internet to cross check
 
-https://www.gfd-dennou.org/arch/eriko/QBO/index.html
+Data to cross check can be found under the following link:
+
+https://acd-ext.gsfc.nasa.gov/Data_services/met/qbo/QBO_Singapore_Uvals_GSFC.txt
+
+The file has to be placed in the directory `data/`
+
+You have to **remove the first 9 lines** in order to make it readable for Python.
+
+If you want to skip this step, you can download a preprocessed version [here](https://1drv.ms/t/s!AjmYENXxse7Bgu5zq1jKa4INqs6MoQ?e=qbyuof)
 
 ## Useful Materials
 * [How to Write a Good Git Commit Message](https://chris.beams.io/posts/git-commit/)
