@@ -89,7 +89,7 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, metric
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    fig, ax = plt.subplots(figsize=(8*len(metrics), 10*len(metrics)), nrows=12, ncols=len(metrics))
+    fig, ax = plt.subplots(figsize=(8*len(metrics), 14*len(metrics)), nrows=12, ncols=len(metrics))
     fig.subplots_adjust(hspace=0, wspace=0)
 
     for month in range(len(months)):
