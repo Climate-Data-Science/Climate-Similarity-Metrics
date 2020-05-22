@@ -173,7 +173,8 @@ def plot_similarities_winter_only(map_array, reference_series, metrics, level=0)
 
 def plot_similarity_dependency(map_array, reference_series, metric1, metric2, level=0):
     """
-    Calculate and plot dependency between two similarity metrics
+    Calculate and plot dependency between two similarity metrics with one similarity
+    metric on the x-axis and one on the y-axis
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
@@ -183,8 +184,6 @@ def plot_similarity_dependency(map_array, reference_series, metric1, metric2, le
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    (len_latitude, len_longitude) = map_array.shape[2:]
-
     #Compute similarities
     sim_metric1 = calc.calculate_series_similarity(map_array, reference_series, level, metric1)
     sim_metric2 = calc.calculate_series_similarity(map_array, reference_series, level, metric2)
@@ -195,3 +194,113 @@ def plot_similarity_dependency(map_array, reference_series, metric1, metric2, le
     plt.ylabel(metric2.__name__)
     plt.title("Dependency between {} and {}".format(metric1.__name__, metric2.__name__))
     plt.show()
+
+
+def plot_similarity_dependency_regions(map_array, reference_series, metric1, metric2,
+                                       mode="high_high", level=0):
+    """
+    Plot regions where two similarity metrics have extreme values.
+
+    Args:
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        metric1 (function): First similarity metric to compute similarity between two time series
+        metric2 (function): Second similarity metric to compute similarity between two time series
+        mode (str, optional): Mode defining which extremes to visualize
+            Options: "high_high": High values in metric1 and high values in metric2
+                     "high_low": High values in metric1 and low values in metric2
+                     "low_high": Low values in metric1 and high values in metric2
+                     "low_low": Low values in metric1 and low values in metric2
+            Defaults to "high_high"
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+    """
+    #Compute similarities
+    sim_metric1 = calc.calculate_series_similarity(map_array, reference_series, level, metric1)
+    sim_metric2 = calc.calculate_series_similarity(map_array, reference_series, level, metric2)
+
+    if mode == "high_high":
+        plot_high_high_similarity_dependency_regions(sim_metric1, sim_metric2)
+        plt.title("High values in {} and high values in {}".format(metric1.__name__,
+                                                                   metric2.__name__))
+        plt.show()
+    elif mode == "high_low":
+        plot_high_low_similarity_dependency_regions(sim_metric1, sim_metric2)
+        plt.title("High values in {} and low values in {}".format(metric1.__name__,
+                                                                  metric2.__name__))
+        plt.show()
+    elif mode == "low_high":
+        plot_high_low_similarity_dependency_regions(sim_metric2, sim_metric1)
+        plt.title("Low values in {} and high values in {}".format(metric1.__name__,
+                                                                  metric2.__name__))
+        plt.show()
+    elif mode == "low_low":
+        plot_low_low_similarity_dependency_regions(sim_metric1, sim_metric2)
+        plt.title("Low values in {} and low values in {}".format(metric1.__name__,
+                                                                 metric2.__name__))
+        plt.show()
+    else:
+        print("Mode unavailable")
+
+
+def plot_high_high_similarity_dependency_regions(sim_metric1, sim_metric2):
+    """
+    Plot points where similarity values for both similarity metrics are high
+
+    Args:
+        sim_metric1 (np.ndarray): Map with shape (256, 512) containing similarity values
+        sim_metric1 (np.ndarray): Map with shape (256, 512) containing similarity values
+    """
+    values1 = sim_metric1 > np.percentile(sim_metric1, 95)
+    values2 = sim_metric2 > np.percentile(sim_metric2, 95)
+    indexes_to_draw = values1 & values2
+
+    draw_indexes_on_map(indexes_to_draw)
+
+
+def plot_high_low_similarity_dependency_regions(sim_metric1, sim_metric2):
+    """
+    Plot points where similarity values are high for first similarity metric and low for
+    the second similarity metric
+
+    Args:
+        sim_metric1 (np.ndarray): Map with shape (256, 512) containing similarity values
+        sim_metric1 (np.ndarray): Map with shape (256, 512) containing similarity values
+    """
+    values1 = sim_metric1 > np.percentile(sim_metric1, 95)
+    values2 = sim_metric2 < np.percentile(sim_metric2, 5)
+    indexes_to_draw = values1 & values2
+
+    draw_indexes_on_map(indexes_to_draw)
+
+
+def plot_low_low_similarity_dependency_regions(sim_metric1, sim_metric2):
+    """
+    Plot points where similarity values for both similarity metrics are low
+
+    Args:
+        sim_metric1 (np.ndarray): Map with shape (256, 512) containing similarity values
+        sim_metric1 (np.ndarray): Map with shape (256, 512) containing similarity values
+    """
+    values1 = sim_metric1 < np.percentile(sim_metric1, 5)
+    values2 = sim_metric2 < np.percentile(sim_metric2, 5)
+    indexes_to_draw = values1 & values2
+
+    draw_indexes_on_map(indexes_to_draw)
+
+
+def draw_indexes_on_map(indexes_to_draw):
+    """
+    Draw points on maps
+
+    Args:
+        indexes_to_draw (np.ndarray): Array of shape (256, 512) containing Boolean values
+    """
+    #Draw map
+    m = Basemap(projection='mill', lon_0=30, resolution='l')
+    m.drawcoastlines()
+    lons, lats = m.makegrid(512, 256)
+    x, y = m(lons, lats)
+
+    #Mark points on map
+    cs = m.contourf(x, y, indexes_to_draw[:, :])

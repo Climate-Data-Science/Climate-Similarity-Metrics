@@ -3,7 +3,7 @@
 """
 
 import numpy as np
-from joblib import Parallel, delayed
+from joblib import Parallel, delayed # pylint: disable=E0401
 
 import similarity_measures
 
