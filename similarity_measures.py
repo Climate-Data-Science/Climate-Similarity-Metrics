@@ -80,7 +80,7 @@ def cosine_similarity(series1, series2):
     Returns:
         Cosine distance between the two series
     """
-    return sc.cosine(series1, series2)
+    return 1 - sc.cosine(series1, series2)
 
 def mutual_information(series1, series2):
     """
