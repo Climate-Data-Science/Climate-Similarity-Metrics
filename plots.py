@@ -36,6 +36,7 @@ def plot_similarities(map_array, reference_series, metrics, level=0, mode="whole
     else:
         print("Mode not available")
 
+
 def plot_similarities_whole_period(map_array, reference_series, metrics, level=0):
     """
     Plot the similarity of a reference data series and all points on the map for the whole period
@@ -118,6 +119,7 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, metric
     fig.suptitle("Similarity between QBO and all other points 1979 - 2019 per month")
     plt.show()
 
+
 def plot_similarities_winter_only(map_array, reference_series, metrics, level=0):
     """
     Plot the similarity of a reference data series and all points on the map for the whole
@@ -166,4 +168,30 @@ def plot_similarities_winter_only(map_array, reference_series, metrics, level=0)
         ax[i].set_title(metric.__name__)
 
     fig.suptitle("Similarity between QBO and all other points 1979 - 2019 for Winter months")
+    plt.show()
+
+
+def plot_similarity_dependency(map_array, reference_series, metric1, metric2, level=0):
+    """
+    Calculate and plot dependency between two similarity metrics
+
+    Args:
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        metric1 (function): First similarity metric to compute similarity between two time series
+        metric2 (function): Second similarity metric to compute similarity between two time series
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+    """
+    (len_latitude, len_longitude) = map_array.shape[2:]
+
+    #Compute similarities
+    sim_metric1 = calc.calculate_series_similarity(map_array, reference_series, level, metric1)
+    sim_metric2 = calc.calculate_series_similarity(map_array, reference_series, level, metric2)
+
+    #Plot dependency
+    plt.scatter(sim_metric1, sim_metric2, )
+    plt.xlabel(metric1.__name__)
+    plt.ylabel(metric2.__name__)
+    plt.title("Dependency between {} and {}".format(metric1.__name__, metric2.__name__))
     plt.show()
