@@ -37,23 +37,6 @@ def manhattan_similarity(series1, series2):
     """
     return sc.cityblock(series1, series2)
 
-def mahalanobis_similarity(series1, series2): # pylint: disable=W0613
-    """
-    Compute the Mahanalobis distance coefficient between two series
-
-    Quantifies the difference between time series but accounts for
-    non-stationarity of variance and temporalcross-correlation.
-
-    Args:
-        series1 (numpy.ndarray): First series
-        series2 (numpy.ndarray): Second series
-
-    Returns:
-        Mahalanobis distance between the two series
-    """
-    #TODO Implement Mahalanobis Distance # pylint: disable=W0511
-    return 0
-
 def euclidean_similarity(series1, series2):
     """
     Compute the Euclidean distance between two series
