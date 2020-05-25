@@ -8,7 +8,7 @@ from joblib import Parallel, delayed # pylint: disable=E0401
 import similarity_measures
 
 def calculate_pointwise_similarity(map_array, lat, lon, level=0,
-                                   sim_func=similarity_measures.correlation_similarity):
+                                   sim_func=similarity_measures.pearson_correlation):
     """
     Calculate point-wise similarity of all points on a map to a reference point over time
 
@@ -30,7 +30,7 @@ def calculate_pointwise_similarity(map_array, lat, lon, level=0,
 
 
 def calculate_series_similarity(map_array, reference_series, level=0,
-                                sim_func=similarity_measures.correlation_similarity):
+                                sim_func=similarity_measures.pearson_correlation):
     """
     Calculate similarity of all points on a map to a reference series
 
@@ -57,7 +57,7 @@ def calculate_series_similarity(map_array, reference_series, level=0,
 
 def calculate_series_similarity_per_period(map_array, reference_series,
                                            level=0, period_length=12,
-                                           sim_func=similarity_measures.correlation_similarity):
+                                           sim_func=similarity_measures.pearson_correlation):
     """
     Calculate similarity of all points on a map to a reference series per period
 

@@ -3,11 +3,12 @@ Module containing different similarity measures for time series
 """
 import numpy as np
 import scipy.spatial.distance as sc
+from scipy.stats import spearmanr, kendalltau
 import pyinform # pylint: disable=E0401
 import similaritymeasures # pylint: disable=E0401
 from sklearn.decomposition import PCA # pylint: disable=E0401
 
-def correlation_similarity(series1, series2):
+def pearson_correlation(series1, series2):
     """
     Compute the Pearson correlation coefficient between two series
 
@@ -22,7 +23,37 @@ def correlation_similarity(series1, series2):
     """
     return np.corrcoef([series1, series2])[0, 1]
 
-def manhattan_similarity(series1, series2):
+def spearman_correlation(series1, series2):
+    """
+    Compute the Spearman correlation coefficient between two series
+
+    Benchmarks monotonic relationships between time series.
+
+    Args:
+        series1 (numpy.ndarray): First series
+        series2 (numpy.ndarray): Second series
+
+    Returns:
+        Spearman correlation coefficient between the two series
+    """
+    return spearmanr(series1, series2).correlation
+
+def kendall_tau(series1, series2):
+    """
+    Compute the Kendall Tau coefficient between two series
+
+    Non-parametric measure of relationship between time series.
+
+    Args:
+        series1 (numpy.ndarray): First series
+        series2 (numpy.ndarray): Second series
+
+    Returns:
+        Kendall Tau correlation coefficient between the two series
+    """
+    return kendalltau(series1, series2).correlation
+
+def manhattan_distance(series1, series2):
     """
     Compute the City Block (Manhattan) distance between two series
 
@@ -37,7 +68,7 @@ def manhattan_similarity(series1, series2):
     """
     return sc.cityblock(series1, series2)
 
-def euclidean_similarity(series1, series2):
+def euclidean_distance(series1, series2):
     """
     Compute the Euclidean distance between two series
 
