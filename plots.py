@@ -2,6 +2,7 @@
     TODO: Module Docstring
 """
 import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 from mpl_toolkits.basemap import Basemap
 import calculations as calc
@@ -10,15 +11,19 @@ months = ["January", "February", "March", "April", "May",
           "June", "July", "August", "September", "October",
           "November", "December"]
 
-def plot_similarities(map_array, reference_series, metrics, level=0, mode="whole_period"):
+def plot_similarities(map_array, reference_series, metrics, labels, level=0, mode="whole_period"):
     """
     Plot the similarity of a reference data series and all points on the map regarding different
-    similarity measures
+    similarity measures.
+
+    In order to make the values of the different similarity metrics comparable, they are binned in 10%
+    bins using calculations.binning_values_to_quantiles.
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
         metrics (list): List with similarity metrics to compute similarity between two time series
+        labels (list): List of labels for the metrics
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
         mode (str, optional): Mode of visualization
@@ -28,29 +33,36 @@ def plot_similarities(map_array, reference_series, metrics, level=0, mode="whole
             Defaults to "whole_period"
     """
     if mode == "whole_period":
-        plot_similarities_whole_period(map_array, reference_series, metrics, level)
+        plot_similarities_whole_period(map_array, reference_series, metrics, labels, level)
     elif mode == "whole_period_per_month":
-        plot_similarities_whole_period_per_month(map_array, reference_series, metrics, level)
+        plot_similarities_whole_period_per_month(map_array, reference_series, metrics, labels, level)
     elif mode == "whole_period_winter_only":
-        plot_similarities_winter_only(map_array, reference_series, metrics, level)
+        plot_similarities_winter_only(map_array, reference_series, metrics, labels, level)
     else:
         print("Mode not available")
 
 
-def plot_similarities_whole_period(map_array, reference_series, metrics, level=0):
+def plot_similarities_whole_period(map_array, reference_series, metrics, labels, level=0):
     """
     Plot the similarity of a reference data series and all points on the map for the whole period
     regarding different similarity measures
 
     Each column contains a different similarity metric.
 
+    In order to make the values of the different similarity metrics comparable, they are binned in 10%
+    bins using calculations.binning_values_to_quantiles.
+
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         referenceSeries (numpy.ndarray): 1 dimensional reference series
         metrics (list): List with similarity metrics to compute similarity between two time series
+        labels (list): List of labels for the metrics
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
+    norm = matplotlib.colors.Normalize(vmin=0, vmax=1, clip=True)
+    mapper= matplotlib.cm.ScalarMappable(norm=norm)
+
     fig, ax = plt.subplots(nrows=1, ncols=len(metrics), figsize=(8*len(metrics), 10))
 
     for i, metric in enumerate(metrics):
@@ -67,31 +79,34 @@ def plot_similarities_whole_period(map_array, reference_series, metrics, level=0
         x, y = m(lons, lats)
 
         #Draw similarity
-        cs = m.contourf(x, y, sim_whole_period[:, :])
-        cbar = m.colorbar(cs, location='bottom', pad="5%")
+        cs = m.contourf(x, y, calc.binning_values_to_quantiles(sim_whole_period)[:])
+        cbar = m.colorbar(mapper, location='bottom', pad="5%")
 
-        ax[i].set_title(metric.__name__)
+        ax[i].set_title(labels[i])
 
     fig.suptitle("Similarity between QBO and all other points 1979 - 2019")
     plt.show()
 
 
-def plot_similarities_whole_period_per_month(map_array, reference_series, metrics, level=0):
+def plot_similarities_whole_period_per_month(map_array, reference_series, metrics, labels, level=0):
     """
     Plot the similarity of a reference data series and all points on the map for the whole period,
     but every month seperately, regarding different similarity measures
 
     Each column contains a different similarity metric and each row contains a different month.
 
+    In order to make the values of the different similarity metrics comparable, they are binned in 10%
+    bins using calculations.binning_values_to_quantiles.
+
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         referenceSeries (numpy.ndarray): 1 dimensional reference series
         metrics (list): List with similarity metrics to compute similarity between two time series
+        labels (list): List of labels for the metrics
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
     fig, ax = plt.subplots(figsize=(8*len(metrics), 14*len(metrics)), nrows=12, ncols=len(metrics))
-    fig.subplots_adjust(hspace=0, wspace=0)
 
     for month in range(len(months)):
         ax[month][0].set_ylabel(months[month])
@@ -101,7 +116,7 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, metric
         reference_series_month = [reference_series[12 * i + month] for i in range(40)]
 
         for i, metric in enumerate(metrics):
-            ax[0][i].set_title(metric.__name__)
+            ax[0][i].set_title(labels[i])
 
             #Calculate similarities
             similarity_month = calc.calculate_series_similarity(map_array_month,
@@ -114,19 +129,22 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, metric
             m.drawcoastlines()
             lons, lats = m.makegrid(512, 256)
             x, y = m(lons, lats)
-            cs = m.contourf(x, y, similarity_month)
+            cs = m.contourf(x, y, calc.binning_values_to_quantiles(similarity_month))
 
     fig.suptitle("Similarity between QBO and all other points 1979 - 2019 per month")
     plt.show()
 
 
-def plot_similarities_winter_only(map_array, reference_series, metrics, level=0):
+def plot_similarities_winter_only(map_array, reference_series, metrics, labels, level=0):
     """
     Plot the similarity of a reference data series and all points on the map for the whole
     period, but only winter months are taken into account, regarding different similarity
     measures
 
     Each column contains a different similarity metric.
+
+    In order to make the values of the different similarity metrics comparable, they are binned in 10%
+    bins using calculations.binning_values_to_quantiles.
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
@@ -135,6 +153,9 @@ def plot_similarities_winter_only(map_array, reference_series, metrics, level=0)
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
+    norm = matplotlib.colors.Normalize(vmin=0, vmax=1, clip=True)
+    mapper= matplotlib.cm.ScalarMappable(norm=norm)
+
     fig, ax = plt.subplots(nrows=1, ncols=len(metrics), figsize=(8*len(metrics), 10))
 
     winter_indices = []
@@ -162,145 +183,100 @@ def plot_similarities_winter_only(map_array, reference_series, metrics, level=0)
         x, y = m(lons, lats)
 
         #Draw similarity
-        cs = m.contourf(x, y, sim_whole_period_winter[:, :])
-        cbar = m.colorbar(cs, location='bottom', pad="5%")
+        cs = m.contourf(x, y, calc.binning_values_to_quantiles(sim_whole_period_winter))
+        cbar = m.colorbar(mapper, location='bottom', pad="5%")
 
-        ax[i].set_title(metric.__name__)
+        ax[i].set_title(labels[i])
 
     fig.suptitle("Similarity between QBO and all other points 1979 - 2019 for Winter months")
     plt.show()
 
 
-def plot_similarity_dependency(map_array, reference_series, metric1, metric2, level=0):
+def plot_similarity_dependency(map_array, reference_series, metrics, labels, level=0):
     """
-    Calculate and plot dependency between two similarity metrics with one similarity
+    Plot a matrix of dependcies between two similarity metrics with one similarity
     metric on the x-axis and one on the y-axis
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
-        metric1 (function): First similarity metric to compute similarity between two time series
-        metric2 (function): Second similarity metric to compute similarity between two time series
+        metrics (list): List of similarity metrics to compute similarity between two time series
+        labels (list): List of labels for the metrics
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
     #Compute similarities
-    sim_metric1 = calc.calculate_series_similarity(map_array, reference_series, level, metric1)
-    sim_metric2 = calc.calculate_series_similarity(map_array, reference_series, level, metric2)
+    similarities = []
+    for i, metric in enumerate(metrics):
+        similarities.append(np.array(calc.calculate_series_similarity(map_array,
+                                                                      reference_series,
+                                                                      level,
+                                                                      metric)))
 
-    #Plot dependency
-    plt.scatter(sim_metric1, sim_metric2, )
-    plt.xlabel(metric1.__name__)
-    plt.ylabel(metric2.__name__)
-    plt.title("Dependency between {} and {}".format(metric1.__name__, metric2.__name__))
+    n_metrics = len(metrics)
+    #Plot dependencies in matrix
+    fig, ax = plt.subplots(nrows=n_metrics, ncols=n_metrics, figsize=(8 * n_metrics, 8 * n_metrics))
+
+    for i, metric_i in enumerate(metrics):
+        for j, metric_j in enumerate(metrics):
+            ax[i][j].scatter(similarities[j], similarities[i])
+
+    for i, label in enumerate(labels):
+        ax[i][0].set_ylabel(label)
+        ax[0][i].set_title(label)
+
+    fig.suptitle("Dependency between pairs of similarity metrics")
     plt.show()
 
 
-def plot_similarity_dependency_regions(map_array, reference_series, metric1, metric2,
-                                       mode="high_high", level=0):
+def combine_similarity_metrics(map_array, reference_series, combination_func, metrics, labels, level=0):
     """
-    Plot regions where two similarity metrics have extreme values.
+    Plot a matrix of combinations of two similarity metrics. The combination_func defines how the
+    values are combined.
+
+    Before the values are combined, they are binned in 10% bins using
+    calculations.binning_values_to_quantiles.
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
-        metric1 (function): First similarity metric to compute similarity between two time series
-        metric2 (function): Second similarity metric to compute similarity between two time series
-        mode (str, optional): Mode defining which extremes to visualize
-            Options: "high_high": High values in metric1 and high values in metric2
-                     "high_low": High values in metric1 and low values in metric2
-                     "low_high": Low values in metric1 and high values in metric2
-                     "low_low": Low values in metric1 and low values in metric2
-            Defaults to "high_high"
+        combination_func (function): Function that comines two similarity values into one
+        metrics (list): List of similarity metrics to compute similarity between two time series
+        labels (list): List of labels for the metrics
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
     #Compute similarities
-    sim_metric1 = calc.calculate_series_similarity(map_array, reference_series, level, metric1)
-    sim_metric2 = calc.calculate_series_similarity(map_array, reference_series, level, metric2)
+    similarities = []
+    for i, metric in enumerate(metrics):
+        sim = calc.calculate_series_similarity(map_array, reference_series, level, metric)
+        similarities.append(calc.binning_values_to_quantiles(sim))
 
-    if mode == "high_high":
-        plot_high_high_similarity_dependency_regions(sim_metric1, sim_metric2)
-        plt.title("High values in {} and high values in {}".format(metric1.__name__,
-                                                                   metric2.__name__))
-        plt.show()
-    elif mode == "high_low":
-        plot_high_low_similarity_dependency_regions(sim_metric1, sim_metric2)
-        plt.title("High values in {} and low values in {}".format(metric1.__name__,
-                                                                  metric2.__name__))
-        plt.show()
-    elif mode == "low_high":
-        plot_high_low_similarity_dependency_regions(sim_metric2, sim_metric1)
-        plt.title("Low values in {} and high values in {}".format(metric1.__name__,
-                                                                  metric2.__name__))
-        plt.show()
-    elif mode == "low_low":
-        plot_low_low_similarity_dependency_regions(sim_metric1, sim_metric2)
-        plt.title("Low values in {} and low values in {}".format(metric1.__name__,
-                                                                 metric2.__name__))
-        plt.show()
-    else:
-        print("Mode unavailable")
+    n_metrics = len(metrics)
+    #Plot dependencies in matrix
+    fig, ax = plt.subplots(nrows=n_metrics, ncols=n_metrics, figsize=(8 * n_metrics, 8 * n_metrics))
 
 
-def plot_high_high_similarity_dependency_regions(sim_metric1, sim_metric2):
-    """
-    Plot points where similarity values for both similarity metrics are high
+    for i in range(n_metrics):
+        for j in range(n_metrics):
+            combination = combination_func(similarities[i], similarities[j])
 
-    Args:
-        sim_metric1 (np.ndarray): Map with shape (256, 512) containing similarity values
-        sim_metric1 (np.ndarray): Map with shape (256, 512) containing similarity values
-    """
-    values1 = sim_metric1 > np.percentile(sim_metric1, 95)
-    values2 = sim_metric2 > np.percentile(sim_metric2, 95)
-    indexes_to_draw = values1 & values2
+            m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i][j])
+            m.drawcoastlines()
+            lons, lats = m.makegrid(512, 256)
+            x, y = m(lons, lats)
 
-    draw_indexes_on_map(indexes_to_draw)
+            #Draw similarity
+            cs = m.contourf(x, y, combination[:])
+            cbar = m.colorbar(cs, location='bottom', pad="5%")
 
+    for i, label in enumerate(labels):
+        ax[i][0].set_ylabel(label)
+        ax[0][i].set_title(label)
 
-def plot_high_low_similarity_dependency_regions(sim_metric1, sim_metric2):
-    """
-    Plot points where similarity values are high for first similarity metric and low for
-    the second similarity metric
-
-    Args:
-        sim_metric1 (np.ndarray): Map with shape (256, 512) containing similarity values
-        sim_metric1 (np.ndarray): Map with shape (256, 512) containing similarity values
-    """
-    values1 = sim_metric1 > np.percentile(sim_metric1, 95)
-    values2 = sim_metric2 < np.percentile(sim_metric2, 5)
-    indexes_to_draw = values1 & values2
-
-    draw_indexes_on_map(indexes_to_draw)
+    fig.suptitle("Combination of similarity metrics")
+    plt.show()
 
 
-def plot_low_low_similarity_dependency_regions(sim_metric1, sim_metric2):
-    """
-    Plot points where similarity values for both similarity metrics are low
-
-    Args:
-        sim_metric1 (np.ndarray): Map with shape (256, 512) containing similarity values
-        sim_metric1 (np.ndarray): Map with shape (256, 512) containing similarity values
-    """
-    values1 = sim_metric1 < np.percentile(sim_metric1, 5)
-    values2 = sim_metric2 < np.percentile(sim_metric2, 5)
-    indexes_to_draw = values1 & values2
-
-    draw_indexes_on_map(indexes_to_draw)
-
-
-def draw_indexes_on_map(indexes_to_draw):
-    """
-    Draw points on maps
-
-    Args:
-        indexes_to_draw (np.ndarray): Array of shape (256, 512) containing Boolean values
-    """
-    #Draw map
-    m = Basemap(projection='mill', lon_0=30, resolution='l')
-    m.drawcoastlines()
-    lons, lats = m.makegrid(512, 256)
-    x, y = m(lons, lats)
-
-    #Mark points on map
-    cs = m.contourf(x, y, indexes_to_draw[:, :])
+def invert(metric):
+    return (lambda x, y: - metric(x, y))

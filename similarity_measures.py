@@ -181,7 +181,7 @@ def dynamic_time_warping_distance(series1, series2):
 
     return similaritymeasures.dtw(series1_2d, series2_2d)[0]
 
-def  principal_component_distance(series1, series2, k=2):
+def principal_component_distance(series1, series2, k=2):
     """
     Compute the distance of the first k principal components between two series
 

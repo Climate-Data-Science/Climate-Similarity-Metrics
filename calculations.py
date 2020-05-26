@@ -3,6 +3,7 @@
 """
 
 import numpy as np
+import pandas as pd
 from joblib import Parallel, delayed # pylint: disable=E0401
 
 import similarity_measures
@@ -242,3 +243,25 @@ def convert_coordinates_to_grid(geo_coordinates, value):
                          (geo_coordinates > value - tolerance))[0][0]
 
     return gridpoint
+
+
+def binning_values_to_quantiles(map_array, num_bins=10):
+    """
+    Convert a map of values into n percentile bins.
+
+    Each value on the map is replaced with the percentage bin it belongs to.
+    0.3 means this value belongs to the 20%-30% bin which contains the 20%-30%
+    smallest values of the map.
+
+    All the bins have the same size
+
+    Args:
+        map_array (array): Map with values to convert
+        num_bins (int): Number or bins
+
+    Returns:
+        Map with the bin numbers for each value
+    """
+    values = pd.DataFrame(np.array(map_array).flatten())
+    bins = pd.qcut(values.iloc[:, 0], num_bins, labels=False)
+    return np.array((bins + 1 )/ num_bins).reshape(map_array.shape)
