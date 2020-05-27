@@ -3,7 +3,7 @@
 """
 
 import numpy as np
-import pandas as pd
+import pandas as pd # pylint: disable=E0401
 from joblib import Parallel, delayed # pylint: disable=E0401
 
 import similarity_measures
@@ -50,11 +50,32 @@ def calculate_series_similarity(map_array, reference_series, level=0,
     (len_latitude, len_longitude) = map_array.shape[1:]
     sim = np.zeros((len_latitude, len_longitude))
 
-    sim = Parallel(n_jobs=-1)(delayed(sim_func)(reference_series, map_array[:, lat, lon])
-                              for lat in range(len_latitude)
-                              for lon in range(len_longitude))
+    sim[:, :] = Parallel(n_jobs=-1)(delayed(calculate_series_similarity_on_latitude)
+                                    (map_array[:, lat, :], reference_series, sim_func)
+                                    for lat in range(len_latitude))
 
     return np.array(sim).reshape(len_latitude, len_longitude)
+
+
+def calculate_series_similarity_on_latitude(map_array, reference_series,
+                                            sim_func=similarity_measures.pearson_correlation):
+    """
+    Calculate similarity of all points on a specific latitude to a reference series
+
+    Args:
+        map_array (numpy.ndarray): Map with 2 dimensions - time, longitude
+        referenceSeries (numpy.ndarray): 1 dimensional reference series
+        sim_func (str, optional): The similarity function that should be used.
+            Defaults to Pearon's Correlation Coefficient.
+
+    Returns:
+        1 dimensional numpy.ndarray with similarity values of points on this latitude
+        to reference point
+    """
+    sim = np.zeros(map_array.shape[1])
+    for i in range(map_array.shape[1]):
+        sim[i] = sim_func(map_array[:, i], reference_series)
+    return sim
 
 def calculate_series_similarity_per_period(map_array, reference_series,
                                            level=0, period_length=12,
@@ -264,4 +285,4 @@ def binning_values_to_quantiles(map_array, num_bins=10):
     """
     values = pd.DataFrame(np.array(map_array).flatten())
     bins = pd.qcut(values.iloc[:, 0], num_bins, labels=False)
-    return np.array((bins + 1 )/ num_bins).reshape(map_array.shape)
+    return np.array((bins + 1) / num_bins).reshape(map_array.shape)
