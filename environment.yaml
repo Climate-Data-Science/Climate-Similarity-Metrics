@@ -12,3 +12,4 @@ dependencies:
     - pyinform
     - sklearn
     - similaritymeasures
+    - scikit-image

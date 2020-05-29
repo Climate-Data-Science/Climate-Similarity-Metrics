@@ -3,6 +3,7 @@
 """
 
 import numpy as np
+from skimage import exposure
 import pandas as pd # pylint: disable=E0401
 from joblib import Parallel, delayed # pylint: disable=E0401
 
@@ -277,7 +278,7 @@ def binning_values_to_quantiles(map_array, num_bins=10):
     All the bins have the same size
 
     Args:
-        map_array (array): Map with values to convert
+        map_array (array): Map with values to scale
         num_bins (int): Number or bins
 
     Returns:
@@ -286,6 +287,23 @@ def binning_values_to_quantiles(map_array, num_bins=10):
     values = pd.DataFrame(np.array(map_array).flatten())
     bins = pd.qcut(values.iloc[:, 0], num_bins, labels=False)
     return np.array((bins + 1) / num_bins).reshape(map_array.shape)
+
+
+def equalize_histogram(map_array, num_bins=10):
+    """
+    Scale a map of values using histogram equalization.
+
+    It spreads out the most frequent intensity values, i.e. stretching out the
+    value range of the map.
+
+    Args:
+        map_array (array): Map with values to scale
+        num_bins (int): Number or bins
+
+    Returns:
+        Map with the scaled values
+    """
+    return exposure.equalize_hist(map_array, nbins=num_bins)
 
 
 def combine_similarity_metrics(similarities_1, similarities_2, combination_func):
