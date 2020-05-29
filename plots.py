@@ -229,7 +229,8 @@ def plot_similarity_dependency(map_array, reference_series, metrics, labels, lev
     plt.show()
 
 
-def combine_similarity_metrics(map_array, reference_series, combination_func, metrics, labels, level=0):
+def plot_similarity_metrics_combinations(map_array, reference_series, combination_func, metrics, labels,
+                                         scaling_func=calc.binning_values_to_quantiles, level=0):
     """
     Plot a matrix of combinations of two similarity metrics. The combination_func defines how the
     values are combined.
@@ -243,6 +244,9 @@ def combine_similarity_metrics(map_array, reference_series, combination_func, me
         combination_func (function): Function that comines two similarity values into one
         metrics (list): List of similarity metrics to compute similarity between two time series
         labels (list): List of labels for the metrics
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity metrics comparable
+            Defaults to calc.binning_values_to_quantiles
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
@@ -250,7 +254,7 @@ def combine_similarity_metrics(map_array, reference_series, combination_func, me
     similarities = []
     for i, metric in enumerate(metrics):
         sim = calc.calculate_series_similarity(map_array, reference_series, level, metric)
-        similarities.append(calc.binning_values_to_quantiles(sim))
+        similarities.append(scaling_func(sim))
 
     n_metrics = len(metrics)
     #Plot dependencies in matrix
@@ -259,7 +263,7 @@ def combine_similarity_metrics(map_array, reference_series, combination_func, me
 
     for i in range(n_metrics):
         for j in range(n_metrics):
-            combination = combination_func(similarities[i], similarities[j])
+            combination = calc.combine_similarity_metrics(similarities[i], similarities[j], combination_func)
 
             m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i][j])
             m.drawcoastlines()

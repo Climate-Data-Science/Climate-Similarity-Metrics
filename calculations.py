@@ -286,3 +286,21 @@ def binning_values_to_quantiles(map_array, num_bins=10):
     values = pd.DataFrame(np.array(map_array).flatten())
     bins = pd.qcut(values.iloc[:, 0], num_bins, labels=False)
     return np.array((bins + 1) / num_bins).reshape(map_array.shape)
+
+
+def combine_similarity_metrics(similarities_1, similarities_2, combination_func):
+    """
+    Combine two similarity values into one
+
+    Args:
+        similarities_1 (np.ndarray): Map with 2 dimensions - latitude, longitude
+                                    - containing similarity values for each point
+        similarities_2 (np.ndarray): Map with 2 dimensions - latitude, longitude
+                                    - containing similarity values for each point
+        combination_func (function): Function that takes two similarity values and combines
+                                     them to one
+
+    Returns:
+        2-dimensional array with the combined similarity values for each point
+    """
+    return combination_func(similarities_1, similarities_2)
