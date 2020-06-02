@@ -1,0 +1,5 @@
+*.pyc
+*.sw*
+dist/
+build/
+rdc.egg-info/

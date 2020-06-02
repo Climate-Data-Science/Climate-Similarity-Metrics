@@ -21,13 +21,15 @@ Use the data manipulation tool cdo to extract all values for pressure level 30 h
 
 ## Environment Setup
 
-Create a new conda environment with all the required dependencies:
+1. Create a new conda environment with all the required dependencies:
 
 `conda env create -f environment.yaml`
 
-Activate the environment:
+2. Activate the environment:
 
 `conda activate climate_similarity_measures`
+
+3. Navigate to the `Randomized Dependence Coefficient` folder and run `python setup.py install`
 
 ## QBO Index
 

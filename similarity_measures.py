@@ -8,6 +8,7 @@ import pyinform # pylint: disable=E0401
 import minepy # pylint: disable=E0401
 import similaritymeasures # pylint: disable=E0401
 from sklearn.decomposition import PCA # pylint: disable=E0401
+from rdc import rdc
 
 def pearson_correlation(series1, series2):
     """
@@ -226,6 +227,19 @@ def maximal_information_coefficient(series1, series2):
     mine = minepy.MINE()
     mine.compute_score(series1, series2)
     return mine.mic()
+
+def randomized_dependence_coefficient(series1, series2):
+    """
+    Compute the randomized dependence coefficient between two series
+
+    Args:
+        series1 (numpy.ndarray): First series
+        series2 (numpy.ndarray): Second series
+
+    Returns:
+        Randomized dependence coefficient between the two series
+    """
+    return rdc(np.array(series1), np.array(series2))
 
 def shift_to_positive(series):
     """
