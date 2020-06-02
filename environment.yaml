@@ -1,5 +1,6 @@
 name: climate_similarity_measures
 channels:
+  - conda-forge
   - defaults
 dependencies:
   - basemap
@@ -7,6 +8,7 @@ dependencies:
   - jupyter
   - python=3.6
   - joblib
+  - minepy
   - pip
   - pip:
     - pyinform

@@ -5,6 +5,7 @@ import numpy as np
 import scipy.spatial.distance as sc
 from scipy.stats import spearmanr, kendalltau
 import pyinform # pylint: disable=E0401
+import minepy # pylint: disable=E0401
 import similaritymeasures # pylint: disable=E0401
 from sklearn.decomposition import PCA # pylint: disable=E0401
 
@@ -210,6 +211,21 @@ def principal_component_distance(series1, series2, k=2):
 
     distance = np.sqrt(np.sum(np.square(pca1[:, :k] - pca2[:, :k])))
     return distance
+
+def maximal_information_coefficient(series1, series2):
+    """
+    Compute the maximal information coefficient between two series
+
+    Args:
+        series1 (numpy.ndarray): First series
+        series2 (numpy.ndarray): Second series
+
+    Returns:
+        Maximal information coefficient between the two series
+    """
+    mine = minepy.MINE()
+    mine.compute_score(series1, series2)
+    return mine.mic()
 
 def shift_to_positive(series):
     """
