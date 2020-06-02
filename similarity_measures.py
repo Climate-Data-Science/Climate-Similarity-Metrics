@@ -215,7 +215,12 @@ def principal_component_distance(series1, series2, k=2):
 
 def maximal_information_coefficient(series1, series2):
     """
-    Compute the maximal information coefficient between two series
+    Compute the maximal information coefficient between two series.
+
+    MIC captures a wide range of associations both functional and not,
+    and for functional relationships provides a score that roughly equals
+    the coefficient of determination (R^2) of the data relative to the
+    regression function
 
     Args:
         series1 (numpy.ndarray): First series
@@ -231,6 +236,9 @@ def maximal_information_coefficient(series1, series2):
 def randomized_dependence_coefficient(series1, series2):
     """
     Compute the randomized dependence coefficient between two series
+
+    Measure of nonlinear dependence between random variables based on the
+    Hirschfeld-Gebelein-Renyi Maximum Correlation Coefficient
 
     Args:
         series1 (numpy.ndarray): First series
