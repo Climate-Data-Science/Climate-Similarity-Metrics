@@ -249,6 +249,44 @@ def randomized_dependence_coefficient(series1, series2):
     """
     return rdc(np.array(series1), np.array(series2))
 
+def distance_correlation(series1, series2):
+    """
+    Calculate the distance correlation introduced by Gábor J. Székely between two
+    time series
+
+    Args:
+        series1 (numpy.ndarray): First series
+        series2 (numpy.ndarray): Second series
+
+    Returns:
+        Distance Correlation between the two series
+
+    Source:
+        https://gist.github.com/satra/aa3d19a12b74e9ab7941
+
+    """
+    series1 = np.atleast_1d(series1)
+    series2 = np.atleast_1d(series2)
+    if np.prod(series1.shape) == len(series1):
+        series1 = series1[:, None]
+    if np.prod(series2.shape) == len(series2):
+        series2 = series2[:, None]
+    series1 = np.atleast_2d(series1)
+    series2 = np.atleast_2d(series2)
+    n = series1.shape[0]
+    if series2.shape[0] != series1.shape[0]:
+        raise ValueError('Number of samples must match')
+    a = sc.squareform(sc.pdist(series1))
+    b = sc.squareform(sc.pdist(series2))
+    A = a - a.mean(axis=0)[None, :] - a.mean(axis=1)[:, None] + a.mean()
+    B = b - b.mean(axis=0)[None, :] - b.mean(axis=1)[:, None] + b.mean()
+
+    dcov2_xy = (A * B).sum()/float(n * n)
+    dcov2_xx = (A * A).sum()/float(n * n)
+    dcov2_yy = (B * B).sum()/float(n * n)
+    dcor = np.sqrt(dcov2_xy)/np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
+    return dcor
+
 def shift_to_positive(series):
     """
     Shift a series by adding the biggest negative value so all values are greater 0
