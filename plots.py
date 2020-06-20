@@ -89,10 +89,11 @@ def plot_similarities_whole_period(map_array, reference_series, metrics, labels,
         #Draw similarity
         cs = m.contourf(x, y, scaling_func(sim_whole_period)[:])
         cbar = m.colorbar(mapper, location='bottom', pad="5%")
+        cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
 
         ax[i].set_title(labels[i])
 
-    fig.suptitle("Similarity between QBO and all other points 1979 - 2019")
+    fig.suptitle("Similarity between QBO and all other points for the whole period")
     plt.show()
 
 
@@ -142,6 +143,7 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, metric
             lons, lats = m.makegrid(512, 256)
             x, y = m(lons, lats)
             cs = m.contourf(x, y, scaling_func(similarity_month))
+            cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
 
     fig.suptitle("Similarity between QBO and all other points 1979 - 2019 per month")
     plt.show()
@@ -202,6 +204,7 @@ def plot_similarities_winter_only(map_array, reference_series, metrics, labels,
         #Draw similarity
         cs = m.contourf(x, y, scaling_func(sim_whole_period_winter))
         cbar = m.colorbar(mapper, location='bottom', pad="5%")
+        cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
 
         ax[i].set_title(labels[i])
 
@@ -290,6 +293,7 @@ def plot_similarity_metrics_combinations(map_array, reference_series, combinatio
             #Draw similarity
             cs = m.contourf(x, y, combination[:])
             cbar = m.colorbar(cs, location='bottom', pad="5%")
+            cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
 
     for i, label in enumerate(labels):
         ax[i][0].set_ylabel(label)
