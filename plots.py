@@ -68,8 +68,6 @@ def plot_similarities_whole_period(map_array, reference_series, metrics, labels,
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    norm = matplotlib.colors.Normalize(vmin=0, vmax=1, clip=True)
-    mapper= matplotlib.cm.ScalarMappable(norm=norm)
 
     fig, ax = plt.subplots(nrows=1, ncols=len(metrics), figsize=(8*len(metrics), 10))
 
@@ -88,8 +86,7 @@ def plot_similarities_whole_period(map_array, reference_series, metrics, labels,
 
         #Draw similarity
         cs = m.contourf(x, y, scaling_func(sim_whole_period)[:])
-        cbar = m.colorbar(mapper, location='bottom', pad="5%")
-        cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
+        cbar = m.colorbar(cs, location='bottom', pad="5%")
 
         ax[i].set_title(labels[i])
 
@@ -143,7 +140,6 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, metric
             lons, lats = m.makegrid(512, 256)
             x, y = m(lons, lats)
             cs = m.contourf(x, y, scaling_func(similarity_month))
-            cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
 
     fig.suptitle("Similarity between QBO and all other points 1979 - 2019 per month")
     plt.show()
@@ -172,8 +168,6 @@ def plot_similarities_winter_only(map_array, reference_series, metrics, labels,
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    norm = matplotlib.colors.Normalize(vmin=0, vmax=1, clip=True)
-    mapper= matplotlib.cm.ScalarMappable(norm=norm)
 
     fig, ax = plt.subplots(nrows=1, ncols=len(metrics), figsize=(8*len(metrics), 10))
 
@@ -203,8 +197,7 @@ def plot_similarities_winter_only(map_array, reference_series, metrics, labels,
 
         #Draw similarity
         cs = m.contourf(x, y, scaling_func(sim_whole_period_winter))
-        cbar = m.colorbar(mapper, location='bottom', pad="5%")
-        cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
+        cbar = m.colorbar(cs, location='bottom', pad="5%")
 
         ax[i].set_title(labels[i])
 
