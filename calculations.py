@@ -266,7 +266,7 @@ def convert_coordinates_to_grid(geo_coordinates, value):
     return gridpoint
 
 
-def combine_similarity_metrics(similarities_1, similarities_2, combination_func):
+def combine_similarity_measures(similarities_1, similarities_2, combination_func):
     """
     Combine two similarity values into one
 

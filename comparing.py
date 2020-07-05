@@ -64,5 +64,5 @@ def min_max_normalization(map_array, a=0, b=1):
 
     return a + ((map_array - min) * (b - a) / (max - min))
 
-def invert(metric):
-    return (lambda x, y: - metric(x, y))
+def invert(measure):
+    return (lambda x, y: - measure(x, y))

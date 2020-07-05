@@ -12,22 +12,22 @@ months = ["January", "February", "March", "April", "May",
           "June", "July", "August", "September", "October",
           "November", "December"]
 
-def plot_similarities(map_array, reference_series, metrics, labels,
+def plot_similarities(map_array, reference_series, measures, labels,
                       scaling_func=comp.binning_values_to_quantiles, level=0, mode="whole_period"):
     """
     Plot the similarity of a reference data series and all points on the map regarding different
     similarity measures.
 
-    In order to make the values of the different similarity metrics comparable, they are binned in 10%
+    In order to make the values of the different similarity measures comparable, they are binned in 10%
     bins using comparing.binning_values_to_quantiles.
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
-        metrics (list): List with similarity metrics to compute similarity between two time series
-        labels (list): List of labels for the metrics
+        measures (list): List with similarity measures to compute similarity between two time series
+        labels (list): List of labels for the measures
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
-                                           to make the similarity values of different similarity metrics comparable
+                                           to make the similarity values of different similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
@@ -38,46 +38,46 @@ def plot_similarities(map_array, reference_series, metrics, labels,
             Defaults to "whole_period"
     """
     if mode == "whole_period":
-        plot_similarities_whole_period(map_array, reference_series, metrics, labels, scaling_func, level)
+        plot_similarities_whole_period(map_array, reference_series, measures, labels, scaling_func, level)
     elif mode == "whole_period_per_month":
-        plot_similarities_whole_period_per_month(map_array, reference_series, metrics, labels, scaling_func, level)
+        plot_similarities_whole_period_per_month(map_array, reference_series, measures, labels, scaling_func, level)
     elif mode == "whole_period_winter_only":
-        plot_similarities_winter_only(map_array, reference_series, metrics, labels, scaling_func, level)
+        plot_similarities_winter_only(map_array, reference_series, measures, labels, scaling_func, level)
     else:
         print("Mode not available")
 
 
-def plot_similarities_whole_period(map_array, reference_series, metrics, labels,
+def plot_similarities_whole_period(map_array, reference_series, measures, labels,
                                    scaling_func=comp.binning_values_to_quantiles, level=0):
     """
     Plot the similarity of a reference data series and all points on the map for the whole period
     regarding different similarity measures
 
-    Each column contains a different similarity metric.
+    Each column contains a different similarity measure.
 
-    In order to make the values of the different similarity metrics comparable, they are binned in 10%
+    In order to make the values of the different similarity measures comparable, they are binned in 10%
     bins using comparing.binning_values_to_quantiles.
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         referenceSeries (numpy.ndarray): 1 dimensional reference series
-        metrics (list): List with similarity metrics to compute similarity between two time series
-        labels (list): List of labels for the metrics
+        measures (list): List with similarity measures to compute similarity between two time series
+        labels (list): List of labels for the measures
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
-                                           to make the similarity values of different similarity metrics comparable
+                                           to make the similarity values of different similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
 
-    fig, ax = plt.subplots(nrows=1, ncols=len(metrics), figsize=(8*len(metrics), 10))
+    fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(8*len(measures), 10))
 
-    for i, metric in enumerate(metrics):
+    for i, measure in enumerate(measures):
         #Compute similarity
         sim_whole_period = calc.calculate_series_similarity(map_array,
                                                             reference_series,
                                                             level,
-                                                            metric)
+                                                            measure)
 
         #Draw map
         m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i])
@@ -96,29 +96,29 @@ def plot_similarities_whole_period(map_array, reference_series, metrics, labels,
     plt.show()
 
 
-def plot_similarities_whole_period_per_month(map_array, reference_series, metrics, labels,
+def plot_similarities_whole_period_per_month(map_array, reference_series, measures, labels,
                                              scaling_func=comp.binning_values_to_quantiles, level=0):
     """
     Plot the similarity of a reference data series and all points on the map for the whole period,
     but every month seperately, regarding different similarity measures
 
-    Each column contains a different similarity metric and each row contains a different month.
+    Each column contains a different similarity measure and each row contains a different month.
 
-    In order to make the values of the different similarity metrics comparable, they are binned in 10%
+    In order to make the values of the different similarity measures comparable, they are binned in 10%
     bins using comparing.binning_values_to_quantiles.
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         referenceSeries (numpy.ndarray): 1 dimensional reference series
-        metrics (list): List with similarity metrics to compute similarity between two time series
-        labels (list): List of labels for the metrics
+        measures (list): List with similarity measures to compute similarity between two time series
+        labels (list): List of labels for the measures
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
-                                           to make the similarity values of different similarity metrics comparable
+                                           to make the similarity values of different similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    fig, ax = plt.subplots(figsize=(8*len(metrics), 14*len(metrics)), nrows=12, ncols=len(metrics))
+    fig, ax = plt.subplots(figsize=(8*len(measures), 14*len(measures)), nrows=12, ncols=len(measures))
 
     for month in range(len(months)):
         ax[month][0].set_ylabel(months[month])
@@ -127,14 +127,14 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, metric
         map_array_month = np.array([map_array[12 * i + month, :, :, :] for i in range(40)])
         reference_series_month = [reference_series[12 * i + month] for i in range(40)]
 
-        for i, metric in enumerate(metrics):
+        for i, measure in enumerate(measures):
             ax[0][i].set_title(labels[i])
 
             #Calculate similarities
             similarity_month = calc.calculate_series_similarity(map_array_month,
                                                                 reference_series_month,
                                                                 level,
-                                                                metric)
+                                                                measure)
 
             #Plot Map
             m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[month][i])
@@ -147,31 +147,31 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, metric
     plt.show()
 
 
-def plot_similarities_winter_only(map_array, reference_series, metrics, labels,
+def plot_similarities_winter_only(map_array, reference_series, measures, labels,
                                   scaling_func=comp.binning_values_to_quantiles, level=0):
     """
     Plot the similarity of a reference data series and all points on the map for the whole
     period, but only winter months are taken into account, regarding different similarity
     measures
 
-    Each column contains a different similarity metric.
+    Each column contains a different similarity measure.
 
-    In order to make the values of the different similarity metrics comparable, they are binned in 10%
+    In order to make the values of the different similarity measures comparable, they are binned in 10%
     bins using comparing.binning_values_to_quantiles.
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         referenceSeries (numpy.ndarray): 1 dimensional reference series
-        metrics (list): List with similarity metrics to compute similarity between two time series
-        labels (list): List of labels for the metrics
+        measures (list): List with similarity measures to compute similarity between two time series
+        labels (list): List of labels for the measures
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
-                                           to make the similarity values of different similarity metrics comparable
+                                           to make the similarity values of different similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
 
-    fig, ax = plt.subplots(nrows=1, ncols=len(metrics), figsize=(8*len(metrics), 10))
+    fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(8*len(measures), 10))
 
     winter_indices = []
     for i in range(40):
@@ -184,12 +184,12 @@ def plot_similarities_winter_only(map_array, reference_series, metrics, labels,
     reference_series_winter = reference_series[winter_indices]
     map_array_winter = map_array[winter_indices, :, :, :]
 
-    for i, metric in enumerate(metrics):
+    for i, measure in enumerate(measures):
         #Compute similarity
         sim_whole_period_winter = calc.calculate_series_similarity(map_array_winter,
                                                                    reference_series_winter,
                                                                    level,
-                                                                   metric)
+                                                                   measure)
 
         #Draw map
         m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i])
@@ -208,47 +208,47 @@ def plot_similarities_winter_only(map_array, reference_series, metrics, labels,
     plt.show()
 
 
-def plot_similarity_dependency(map_array, reference_series, metrics, labels, level=0):
+def plot_similarity_dependency(map_array, reference_series, measures, labels, level=0):
     """
-    Plot a matrix of dependcies between two similarity metrics with one similarity
-    metric on the x-axis and one on the y-axis
+    Plot a matrix of dependcies between two similarity measures with one similarity
+    measure on the x-axis and one on the y-axis
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
-        metrics (list): List of similarity metrics to compute similarity between two time series
-        labels (list): List of labels for the metrics
+        measures (list): List of similarity measures to compute similarity between two time series
+        labels (list): List of labels for the measures
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
     #Compute similarities
     similarities = []
-    for i, metric in enumerate(metrics):
+    for i, measure in enumerate(measures):
         similarities.append(np.array(calc.calculate_series_similarity(map_array,
                                                                       reference_series,
                                                                       level,
-                                                                      metric)))
+                                                                      measure)))
 
-    n_metrics = len(metrics)
+    n_measures = len(measures)
     #Plot dependencies in matrix
-    fig, ax = plt.subplots(nrows=n_metrics, ncols=n_metrics, figsize=(8 * n_metrics, 8 * n_metrics))
+    fig, ax = plt.subplots(nrows=n_measures, ncols=n_measures, figsize=(8 * n_measures, 8 * n_measures))
 
-    for i, metric_i in enumerate(metrics):
-        for j, metric_j in enumerate(metrics):
+    for i, measure_i in enumerate(measures):
+        for j, measure_j in enumerate(measures):
             ax[i][j].scatter(similarities[j], similarities[i])
 
     for i, label in enumerate(labels):
         ax[i][0].set_ylabel(label)
         ax[0][i].set_title(label)
 
-    fig.suptitle("Dependency between pairs of similarity metrics")
+    fig.suptitle("Dependency between pairs of similarity measures")
     plt.show()
 
 
-def plot_similarity_metrics_combinations(map_array, reference_series, combination_func, metrics, labels,
+def plot_similarity_measures_combinations(map_array, reference_series, combination_func, measures, labels,
                                          scaling_func=comp.binning_values_to_quantiles, level=0):
     """
-    Plot a matrix of combinations of two similarity metrics. The combination_func defines how the
+    Plot a matrix of combinations of two similarity measures. The combination_func defines how the
     values are combined.
 
     Before the values are combined, they are binned in 10% bins using
@@ -258,28 +258,28 @@ def plot_similarity_metrics_combinations(map_array, reference_series, combinatio
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
         combination_func (function): Function that comines two similarity values into one
-        metrics (list): List of similarity metrics to compute similarity between two time series
-        labels (list): List of labels for the metrics
+        measures (list): List of similarity measures to compute similarity between two time series
+        labels (list): List of labels for the measures
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
-                                           to make the similarity values of different similarity metrics comparable
+                                           to make the similarity values of different similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
     #Compute similarities
     similarities = []
-    for i, metric in enumerate(metrics):
-        sim = calc.calculate_series_similarity(map_array, reference_series, level, metric)
+    for i, measure in enumerate(measures):
+        sim = calc.calculate_series_similarity(map_array, reference_series, level, measure)
         similarities.append(scaling_func(sim))
 
-    n_metrics = len(metrics)
+    n_measures = len(measures)
     #Plot dependencies in matrix
-    fig, ax = plt.subplots(nrows=n_metrics, ncols=n_metrics, figsize=(8 * n_metrics, 8 * n_metrics))
+    fig, ax = plt.subplots(nrows=n_measures, ncols=n_measures, figsize=(8 * n_measures, 8 * n_measures))
 
 
-    for i in range(n_metrics):
-        for j in range(n_metrics):
-            combination = calc.combine_similarity_metrics(similarities[i], similarities[j], combination_func)
+    for i in range(n_measures):
+        for j in range(n_measures):
+            combination = calc.combine_similarity_measures(similarities[i], similarities[j], combination_func)
 
             m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i][j])
             m.drawcoastlines()
@@ -295,5 +295,5 @@ def plot_similarity_metrics_combinations(map_array, reference_series, combinatio
         ax[i][0].set_ylabel(label)
         ax[0][i].set_title(label)
 
-    fig.suptitle("Combination of similarity metrics")
+    fig.suptitle("Combination of similarity measures")
     plt.show()
