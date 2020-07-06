@@ -7,6 +7,7 @@ import numpy as np
 from mpl_toolkits.basemap import Basemap
 import calculations as calc
 import comparing as comp
+import combining as comb
 import similarity_measures as sim
 
 months = ["January", "February", "March", "April", "May",
@@ -334,10 +335,10 @@ def plot_power_of_dependency(map_array, reference_series, combination_func, meas
 
     fig, ax = plt.subplots(nrows=1, ncols=n_measures, figsize=(8 * n_measures, 8))
 
-    power_combination = (lambda corr, meas: combination_func(abs(corr), meas))
+    combination_func = comb.power_combination(combination_func)
 
     for i in range(n_measures):
-        combination = calc.combine_similarity_measures(pearson_similarity, similarities[i], power_combination)
+        combination = calc.combine_similarity_measures(pearson_similarity, similarities[i], combination_func)
 
         m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i])
         m.drawcoastlines()
