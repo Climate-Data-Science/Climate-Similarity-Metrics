@@ -353,6 +353,61 @@ def plot_sign_of_correlation_strength_of_both(map_array, reference_series, combi
     plt.show()
 
 
+def plot_no_dependencies_areas(map_array, reference_series, measures, labels,
+                                         scaling_func=comp.binning_values_to_quantiles, level=0):
+    """
+    Plot a matrix of combinations of two similarity measures and highlight areas where both similarity
+    measures say there is no dependency. The combination_func defines how the values are combined.
+
+    Before the values are combined, they are binned in 10% bins using
+    comparing.binning_values_to_quantiles.
+
+    Args:
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        combination_func (function): Function that comines two similarity values into one
+        measures (list): List of similarity measures to compute similarity between two time series
+        labels (list): List of labels for the measures
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity measures comparable
+            Defaults to comp.binning_values_to_quantiles
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+    """
+    #Compute similarities
+    combination_func = comb.mult
+
+    similarities = []
+    for i, measure in enumerate(measures):
+        sim = calc.calculate_series_similarity(map_array, reference_series, level, measure)
+        similarities.append(scaling_func(sim))
+
+    n_measures = len(measures)
+    #Plot dependencies in matrix
+    fig, ax = plt.subplots(nrows=n_measures, ncols=n_measures, figsize=(8 * n_measures, 8 * n_measures))
+
+
+    for i in range(n_measures):
+        for j in range(n_measures):
+            combination = calc.combine_similarity_measures(similarities[i], similarities[j], combination_func)
+            m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i][j])
+            m.drawcoastlines()
+            lons, lats = m.makegrid(512, 256)
+            x, y = m(lons, lats)
+
+            #Draw similarity
+            cs = m.contourf(x, y, np.ones((256, 512)) - combination[:])
+            cbar = m.colorbar(cs, location='bottom', pad="5%")
+            cbar.ax.set_xticklabels(["Dependencies", "", "", "", "", "", "No Dependency"], rotation=45)
+
+    for i, label in enumerate(labels):
+        ax[i][0].set_ylabel(label)
+        ax[0][i].set_title(label)
+
+    fig.suptitle("Combination of similarity measures (Highlight no dependency areas)")
+    plt.show()
+
+
 def combinations_with_pearson(map_array, reference_series, combination_func, measures, labels,
                                         scaling_func=comp.binning_values_to_quantiles, level=0):
     """
@@ -391,7 +446,6 @@ def combinations_with_pearson(map_array, reference_series, combination_func, mea
         combinations.append(combination)
 
     return combinations
-
 
 
 def plot_map(values, axis):
