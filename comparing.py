@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from skimage import exposure
 
+#Comparing functions
 def binning_values_to_quantiles(map_array, num_bins=10):
     """
     Convert a map of values into n percentile bins.
@@ -64,5 +65,7 @@ def min_max_normalization(map_array, a=0, b=1):
 
     return a + ((map_array - min) * (b - a) / (max - min))
 
+
+#Preprocessing
 def invert(measure):
     return (lambda x, y: - measure(x, y))

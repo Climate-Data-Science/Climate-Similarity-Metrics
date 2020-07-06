@@ -297,7 +297,88 @@ def plot_power_of_dependency(map_array, reference_series, combination_func, meas
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
+    fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(8 * len(measures), 8))
+
+    combination_func = comb.power_combination(combination_func)
+
+    combinations = combinations_with_pearson(map_array, reference_series, combination_func, measures, labels,
+                                             scaling_func, level)
+    for i in range(len(combinations)):
+        plot_map(combinations[i][:], ax[i])
+
+    for i, label in enumerate(labels):
+        ax[i].set_title(label)
+
+    fig.suptitle("Combination with absolute values of Pearson's Correlation")
+    plt.show()
+
+
+def plot_sign_of_correlation_strength_of_both(map_array, reference_series, combination_func, measures, labels,
+                                        scaling_func=comp.binning_values_to_quantiles, level=0):
+    """
+    Plot the combinations of different similarity measures with Pearson's Correlation by taking
+    the sign of Pearson's Correlation and combining the absolute values of Pearson's with the other
+    similarity measure.
+
+    The combination_func defines how the values are combined.
+
+    Before the values are combined with the absolute values of Pearson's Correlation, they are scaled
+    to make value ranges combinable (default: binned in 10% bins using comparing.binning_values_to_quantiles).
+
+    Args:
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        combination_func (function): Function that comines two similarity values into one
+        measures (list): List of similarity measures to compute similarity between two time series
+        labels (list): List of labels for the measures
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity measures comparable
+            Defaults to comp.binning_values_to_quantiles
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+    """
+    fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(8 * len(measures), 8))
+
+    combination_func = comb.take_sign_first_strength_both(combination_func)
+
+    combinations = combinations_with_pearson(map_array, reference_series, combination_func, measures, labels,
+                                            scaling_func, level)
+    for i in range(len(combinations)):
+        plot_map(combinations[i][:], ax[i])
+
+    for i, label in enumerate(labels):
+        ax[i].set_title(label)
+
+    fig.suptitle("Sign of Pearson's and values of both combined")
+    plt.show()
+
+
+def combinations_with_pearson(map_array, reference_series, combination_func, measures, labels,
+                                        scaling_func=comp.binning_values_to_quantiles, level=0):
+    """
+    Return the combinations of values from different similarity measures with the of
+    Pearson's Correlation. The combination_func defines how the values are combined.
+
+    Before the values are combined with the absolute values of Pearson's Correlation, they are scaled
+    to make value ranges combinable (default: binned in 10% bins using comparing.binning_values_to_quantiles).
+
+    Args:
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        combination_func (function): Function that comines two similarity values into one
+        measures (list): List of similarity measures to compute similarity between two time series
+        labels (list): List of labels for the measures
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity measures comparable
+            Defaults to comp.binning_values_to_quantiles
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+
+    Returns:
+        Array with the resulting combination arrays
+    """
     similarities = []
+    combinations = []
     for i, measure in enumerate(measures):
         similarity = calc.calculate_series_similarity(map_array, reference_series, level, measure)
         similarities.append(scaling_func(similarity))
@@ -305,19 +386,12 @@ def plot_power_of_dependency(map_array, reference_series, combination_func, meas
 
     pearson_similarity = calc.calculate_series_similarity(map_array, reference_series, level, sim.pearson_correlation)
 
-    fig, ax = plt.subplots(nrows=1, ncols=n_measures, figsize=(8 * n_measures, 8))
-
-    combination_func = comb.power_combination(combination_func)
-
     for i in range(n_measures):
         combination = calc.combine_similarity_measures(pearson_similarity, similarities[i], combination_func)
-        plot_map(combination[:], ax[i])
+        combinations.append(combination)
 
-    for i, label in enumerate(labels):
-        ax[i].set_title(label)
+    return combinations
 
-    fig.suptitle("Combination with absolute values of Pearson's Correlation")
-    plt.show()
 
 
 def plot_map(values, axis):
