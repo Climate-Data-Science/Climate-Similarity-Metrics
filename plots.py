@@ -7,6 +7,7 @@ import numpy as np
 from mpl_toolkits.basemap import Basemap
 import calculations as calc
 import comparing as comp
+import similarity_measures as sim
 
 months = ["January", "February", "March", "April", "May",
           "June", "July", "August", "September", "October",
@@ -296,4 +297,60 @@ def plot_similarity_measures_combinations(map_array, reference_series, combinati
         ax[0][i].set_title(label)
 
     fig.suptitle("Combination of similarity measures")
+    plt.show()
+
+
+def plot_power_of_dependency(map_array, reference_series, combination_func, measures, labels,
+                             scaling_func=comp.binning_values_to_quantiles, level=0):
+    """
+    Plot the combinations of values from different similarity measures with the absolute values of
+    Pearson's Correlation. Taking the absolute value of Pearson's will eliminate the direction of
+    the dependency and only the information about the strength of dependency will remain.
+
+    The combination_func defines how the values are combined.
+
+    Before the values are combined with the absolute values of Pearson's Correlation, they are scaled
+    to make value ranges combinable (default: binned in 10% bins using comparing.binning_values_to_quantiles).
+
+    Args:
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        combination_func (function): Function that comines two similarity values into one
+        measures (list): List of similarity measures to compute similarity between two time series
+        labels (list): List of labels for the measures
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity measures comparable
+            Defaults to comp.binning_values_to_quantiles
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+    """
+    similarities = []
+    for i, measure in enumerate(measures):
+        similarity = calc.calculate_series_similarity(map_array, reference_series, level, measure)
+        similarities.append(scaling_func(similarity))
+    n_measures = len(measures)
+
+    pearson_similarity = calc.calculate_series_similarity(map_array, reference_series, level, sim.pearson_correlation)
+
+    fig, ax = plt.subplots(nrows=1, ncols=n_measures, figsize=(8 * n_measures, 8))
+
+    power_combination = (lambda corr, meas: combination_func(abs(corr), meas))
+
+    for i in range(n_measures):
+        combination = calc.combine_similarity_measures(pearson_similarity, similarities[i], power_combination)
+
+        m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i])
+        m.drawcoastlines()
+        lons, lats = m.makegrid(512, 256)
+        x, y = m(lons, lats)
+
+        #Draw similarity
+        cs = m.contourf(x, y, combination[:])
+        cbar = m.colorbar(cs, location='bottom', pad="5%")
+        cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
+
+    for i, label in enumerate(labels):
+        ax[i].set_title(label)
+
+    fig.suptitle("Combination with absolute values of Pearson's Correlation")
     plt.show()
