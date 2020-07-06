@@ -80,18 +80,8 @@ def plot_similarities_whole_period(map_array, reference_series, measures, labels
                                                             reference_series,
                                                             level,
                                                             measure)
-
         #Draw map
-        m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i])
-        m.drawcoastlines()
-        lons, lats = m.makegrid(512, 256)
-        x, y = m(lons, lats)
-
-        #Draw similarity
-        cs = m.contourf(x, y, scaling_func(sim_whole_period)[:])
-        cbar = m.colorbar(cs, location='bottom', pad="5%")
-        cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
-
+        plot_map(scaling_func(sim_whole_period), ax[i])
         ax[i].set_title(labels[i])
 
     fig.suptitle("Similarity between QBO and all other points for the whole period")
@@ -192,17 +182,8 @@ def plot_similarities_winter_only(map_array, reference_series, measures, labels,
                                                                    reference_series_winter,
                                                                    level,
                                                                    measure)
-
         #Draw map
-        m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i])
-        m.drawcoastlines()
-        lons, lats = m.makegrid(512, 256)
-        x, y = m(lons, lats)
-
-        #Draw similarity
-        cs = m.contourf(x, y, scaling_func(sim_whole_period_winter))
-        cbar = m.colorbar(cs, location='bottom', pad="5%")
-        cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
+        plot_map(scaling_func(sim_whole_period_winter), ax[i])
 
         ax[i].set_title(labels[i])
 
@@ -282,16 +263,7 @@ def plot_similarity_measures_combinations(map_array, reference_series, combinati
     for i in range(n_measures):
         for j in range(n_measures):
             combination = calc.combine_similarity_measures(similarities[i], similarities[j], combination_func)
-
-            m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i][j])
-            m.drawcoastlines()
-            lons, lats = m.makegrid(512, 256)
-            x, y = m(lons, lats)
-
-            #Draw similarity
-            cs = m.contourf(x, y, combination[:])
-            cbar = m.colorbar(cs, location='bottom', pad="5%")
-            cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
+            plot_map(combination[:], ax[i][j])
 
     for i, label in enumerate(labels):
         ax[i][0].set_ylabel(label)
@@ -339,19 +311,29 @@ def plot_power_of_dependency(map_array, reference_series, combination_func, meas
 
     for i in range(n_measures):
         combination = calc.combine_similarity_measures(pearson_similarity, similarities[i], combination_func)
-
-        m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i])
-        m.drawcoastlines()
-        lons, lats = m.makegrid(512, 256)
-        x, y = m(lons, lats)
-
-        #Draw similarity
-        cs = m.contourf(x, y, combination[:])
-        cbar = m.colorbar(cs, location='bottom', pad="5%")
-        cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
+        plot_map(combination[:], ax[i])
 
     for i, label in enumerate(labels):
         ax[i].set_title(label)
 
     fig.suptitle("Combination with absolute values of Pearson's Correlation")
     plt.show()
+
+
+def plot_map(values, axis):
+    """
+    Plot values on a Basemap maps
+
+    Args:
+        values (numpy.ndarray): 2-d array with dimensions latitude and longitude
+        axis: Axis on which the map should be displayed
+    """
+    m = Basemap(projection='mill', lon_0=30, resolution='l', ax=axis)
+    m.drawcoastlines()
+    lons, lats = m.makegrid(512, 256)
+    x, y = m(lons, lats)
+
+    #Draw similarity
+    cs = m.contourf(x, y, values)
+    cbar = m.colorbar(cs, location='bottom', pad="5%")
+    cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
