@@ -81,5 +81,5 @@ def sign(x):
         Array with signs of values
     """
     result = np.sign(x)
-    np.where(result==0, 1, result)
+    np.where(result == 0, 1, result)
     return result

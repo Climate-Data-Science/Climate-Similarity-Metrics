@@ -20,16 +20,17 @@ def plot_similarities(map_array, reference_series, measures, labels,
     Plot the similarity of a reference data series and all points on the map regarding different
     similarity measures.
 
-    In order to make the values of the different similarity measures comparable, they are binned in 10%
-    bins using comparing.binning_values_to_quantiles.
+    In order to make the values of the different similarity measures comparable, they are binned in
+    10%    bins using comparing.binning_values_to_quantiles.
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
         measures (list): List with similarity measures to compute similarity between two time series
         labels (list): List of labels for the measures
-        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
-                                           to make the similarity values of different similarity measures comparable
+        scaling_func (function, optional): Function that takes a map of similarity values and scales
+                                           them in order to make the similarity values of different
+                                           similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
@@ -40,11 +41,14 @@ def plot_similarities(map_array, reference_series, measures, labels,
             Defaults to "whole_period"
     """
     if mode == "whole_period":
-        plot_similarities_whole_period(map_array, reference_series, measures, labels, scaling_func, level)
+        plot_similarities_whole_period(map_array, reference_series, measures,
+                                       labels, scaling_func, level)
     elif mode == "whole_period_per_month":
-        plot_similarities_whole_period_per_month(map_array, reference_series, measures, labels, scaling_func, level)
+        plot_similarities_whole_period_per_month(map_array, reference_series, measures,
+                                                 labels, scaling_func, level)
     elif mode == "whole_period_winter_only":
-        plot_similarities_winter_only(map_array, reference_series, measures, labels, scaling_func, level)
+        plot_similarities_winter_only(map_array, reference_series, measures,
+                                      labels, scaling_func, level)
     else:
         print("Mode not available")
 
@@ -57,16 +61,17 @@ def plot_similarities_whole_period(map_array, reference_series, measures, labels
 
     Each column contains a different similarity measure.
 
-    In order to make the values of the different similarity measures comparable, they are binned in 10%
-    bins using comparing.binning_values_to_quantiles.
+    In order to make the values of the different similarity measures comparable, they are binned
+    in 10% bins using comparing.binning_values_to_quantiles.
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         referenceSeries (numpy.ndarray): 1 dimensional reference series
         measures (list): List with similarity measures to compute similarity between two time series
         labels (list): List of labels for the measures
-        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
-                                           to make the similarity values of different similarity measures comparable
+        scaling_func (function, optional): Function that takes a map of similarity values and scales
+                                           them in order to make the similarity values of different
+                                           similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
@@ -96,16 +101,17 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, measur
 
     Each column contains a different similarity measure and each row contains a different month.
 
-    In order to make the values of the different similarity measures comparable, they are binned in 10%
-    bins using comparing.binning_values_to_quantiles.
+    In order to make the values of the different similarity measures comparable, they are binned in
+    10% bins using comparing.binning_values_to_quantiles.
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         referenceSeries (numpy.ndarray): 1 dimensional reference series
         measures (list): List with similarity measures to compute similarity between two time series
         labels (list): List of labels for the measures
-        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
-                                           to make the similarity values of different similarity measures comparable
+        scaling_func (function, optional): Function that takes a map of similarity values and scales
+                                           them in order to make the similarity values of different
+                                           similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
@@ -240,11 +246,12 @@ def plot_similarity_measures_combinations(map_array, reference_series, combinati
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
-        combination_func (function): Function that comines two similarity values into one
+        combination_func (function): Function that combines two similarity values into one
         measures (list): List of similarity measures to compute similarity between two time series
         labels (list): List of labels for the measures
-        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
-                                           to make the similarity values of different similarity measures comparable
+        scaling_func (function, optional): Function that takes a map of similarity values and scales
+                                           them in order to make the similarity values of different
+                                           similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
@@ -288,11 +295,12 @@ def plot_power_of_dependency(map_array, reference_series, combination_func, meas
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
-        combination_func (function): Function that comines two similarity values into one
+        combination_func (function): Function that combines two similarity values into one
         measures (list): List of similarity measures to compute similarity between two time series
         labels (list): List of labels for the measures
-        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
-                                           to make the similarity values of different similarity measures comparable
+        scaling_func (function, optional): Function that takes a map of similarity values and scales
+                                           them in order to make the similarity values of different
+                                           similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
@@ -328,7 +336,7 @@ def plot_sign_of_correlation_strength_of_both(map_array, reference_series, combi
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
-        combination_func (function): Function that comines two similarity values into one
+        combination_func (function): Function that combines two similarity values into one
         measures (list): List of similarity measures to compute similarity between two time series
         labels (list): List of labels for the measures
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
@@ -365,7 +373,7 @@ def plot_no_dependencies_areas(map_array, reference_series, measures, labels,
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
-        combination_func (function): Function that comines two similarity values into one
+        combination_func (function): Function that combines two similarity values into one
         measures (list): List of similarity measures to compute similarity between two time series
         labels (list): List of labels for the measures
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
@@ -404,7 +412,71 @@ def plot_no_dependencies_areas(map_array, reference_series, measures, labels,
         ax[i][0].set_ylabel(label)
         ax[0][i].set_title(label)
 
-    fig.suptitle("Combination of similarity measures (Highlight no dependency areas)")
+    fig.suptitle("Combination of similarity measures (Highlight no dependency are)")
+    plt.show()
+
+
+def plot_level_of_agreement(map_array, reference_series, scoring_func, measures, labels,
+                            scaling_func=comp.binning_values_to_quantiles, level=0):
+    """
+    Plot a map with the agreement of several similarity measures.
+    For each similarity measure the scoring function will determine if there is a value that
+    can be considered a dependency or not.
+
+    The plotted map contains the percentages of how many of the similarity measures voted there is
+    a dependency.
+
+    Typical scoring function would be scoring_func = lambda x : x >= 0.8 and typical scaling function would
+    be scaling_func=comp.binning_values_to_quantiles.
+    Using this functions, the output map will show for how many similarity measures the similarity
+    value between the time series of the point and the reference series is in the upper 20%.
+
+    Args:
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        scoring_func (function): Function that takes in a value and outputs a boolean (whether there
+                                 is a dependency or not)
+        measures (list): List of similarity measures to compute similarity between two time series
+        labels (list): List of labels for the measures
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity measures comparable
+            Defaults to comp.binning_values_to_quantiles
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+    """
+    #Compute agreement
+    similarities = []
+    agreement = np.zeros((256, 512))
+    for i, measure in enumerate(measures):
+        similarity = calc.calculate_series_similarity(map_array, reference_series, level, measure)
+        similarities.append(comp.binning_values_to_quantiles(similarity))
+        n_measures = len(measures)
+
+    for similarity_map in similarities:
+        agreement = sum([agreement, np.vectorize(scoring_func)(similarity_map)])
+
+    agreement = agreement / n_measures
+
+
+    #Draw Map
+    fig, (ax, cax) = plt.subplots(nrows=2,figsize=(12, 8),
+                  gridspec_kw={"height_ratios":[1, 0.05]})
+    m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax)
+    m.drawcoastlines()
+    lons, lats = m.makegrid(512, 256)
+    x, y = m(lons, lats)
+    cs = m.contourf(x, y, agreement)
+
+    #Draw Colorbar
+    cmap = matplotlib.cm.viridis
+    bounds = np.linspace(0, 100, n_measures + 2)
+    norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
+    cbar = matplotlib.colorbar.ColorbarBase(cax, cmap=cmap,
+                                norm=norm,
+                                orientation='horizontal',
+                                ticks=np.linspace(0, 100, n_measures + 1),
+                                boundaries=bounds)
+    plt.title("Level of agreement (in %)")
     plt.show()
 
 
@@ -420,7 +492,7 @@ def combinations_with_pearson(map_array, reference_series, combination_func, mea
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
-        combination_func (function): Function that comines two similarity values into one
+        combination_func (function): Function that combines two similarity values into one
         measures (list): List of similarity measures to compute similarity between two time series
         labels (list): List of labels for the measures
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
@@ -450,7 +522,7 @@ def combinations_with_pearson(map_array, reference_series, combination_func, mea
 
 def plot_map(values, axis):
     """
-    Plot values on a Basemap maps
+    Plot values on a Basemap map
 
     Args:
         values (numpy.ndarray): 2-d array with dimensions latitude and longitude
