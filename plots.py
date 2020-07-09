@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 from mpl_toolkits.basemap import Basemap
+from scipy.stats import entropy
 import calculations as calc
 import comparing as comp
 import combining as comb
@@ -449,7 +450,7 @@ def plot_level_of_agreement(map_array, reference_series, scoring_func, measures,
     agreement = np.zeros((256, 512))
     for i, measure in enumerate(measures):
         similarity = calc.calculate_series_similarity(map_array, reference_series, level, measure)
-        similarities.append(comp.binning_values_to_quantiles(similarity))
+        similarities.append(scaling_func(similarity))
         n_measures = len(measures)
 
     for similarity_map in similarities:
@@ -476,7 +477,75 @@ def plot_level_of_agreement(map_array, reference_series, scoring_func, measures,
                                 orientation='horizontal',
                                 ticks=np.linspace(0, 100, n_measures + 1),
                                 boundaries=bounds)
-    plt.title("Level of agreement (in %)")
+    plt.title("Level of agreement (in %) between {}".format(labels))
+    plt.show()
+
+
+def plot_std_between_similarity_measures(map_array, reference_series, measures, labels,
+                            scaling_func=comp.binning_values_to_quantiles, level=0):
+    """
+    Plot a map with the standard deviation between all similarity values, using a list of similarity measures,
+    between the reference series and the time series for each point.
+
+    Args:
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        measures (list): List of similarity measures to compute similarity between two time series
+        labels (list): List of labels for the measures
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity measures comparable
+            Defaults to comp.binning_values_to_quantiles
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+    """
+    #Compute Standard Deviation
+    similarities = []
+    agreement = np.zeros((256, 512))
+    for i, measure in enumerate(measures):
+        similarity = calc.calculate_series_similarity(map_array, reference_series, level, measure)
+        similarities.append(scaling_func(similarity))
+        n_measures = len(measures)
+
+    agreement = np.std(similarities, axis=0)
+
+    #Draw Map
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
+    plot_map(agreement, ax)
+    plt.title("Standard Deviation between {}".format(labels))
+    plt.show()
+
+
+def plot_entropy_between_similarity_measures(map_array, reference_series, measures, labels,
+                            scaling_func=comp.binning_values_to_quantiles, level=0):
+    """
+    Plot a map with the entropy between all similarity values, using a list of similarity measures, between
+    the reference series and the time series for each point.
+
+    Args:
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        measures (list): List of similarity measures to compute similarity between two time series
+        labels (list): List of labels for the measures
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity measures comparable
+            Defaults to comp.binning_values_to_quantiles
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+    """
+    #Compute Standard Deviation
+    similarities = []
+    agreement = np.zeros((256, 512))
+    for i, measure in enumerate(measures):
+        similarity = calc.calculate_series_similarity(map_array, reference_series, level, measure)
+        similarities.append(scaling_func(similarity))
+        n_measures = len(measures)
+
+    agreement = np.apply_along_axis(entropy, 0, similarities)
+
+    #Draw Map
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
+    plot_map(agreement, ax)
+    plt.title("Entropy between {}".format(labels))
     plt.show()
 
 
