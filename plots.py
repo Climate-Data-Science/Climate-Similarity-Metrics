@@ -80,15 +80,24 @@ def plot_similarities_whole_period(map_array, reference_series, measures, labels
 
     fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(8*len(measures), 10))
 
-    for i, measure in enumerate(measures):
-        #Compute similarity
+    if len(measures) == 1:
         sim_whole_period = calc.calculate_series_similarity(map_array,
                                                             reference_series,
                                                             level,
+                                                            measures[0])
+        plot_map(scaling_func(sim_whole_period), ax)
+        ax.set_title(labels[0])
+    else:
+
+        for i, measure in enumerate(measures):
+            #Compute similarity
+            sim_whole_period = calc.calculate_series_similarity(map_array,
+                                                            reference_series,
+                                                            level,
                                                             measure)
-        #Draw map
-        plot_map(scaling_func(sim_whole_period), ax[i])
-        ax[i].set_title(labels[i])
+            #Draw map
+            plot_map(scaling_func(sim_whole_period), ax[i])
+            ax[i].set_title(labels[i])
 
     fig.suptitle("Similarity between QBO and all other points for the whole period")
     plt.show()
@@ -313,7 +322,7 @@ def plot_power_of_dependency(map_array, reference_series, combination_func, meas
     combinations = combinations_with_pearson(map_array, reference_series, combination_func, measures, labels,
                                              scaling_func, level)
     for i in range(len(combinations)):
-        plot_map(combinations[i][:], ax[i])
+        plot_map(scaling_func(combinations[i])[:], ax[i])
 
     for i, label in enumerate(labels):
         ax[i].set_title(label)
@@ -353,7 +362,7 @@ def plot_sign_of_correlation_strength_of_both(map_array, reference_series, combi
     combinations = combinations_with_pearson(map_array, reference_series, combination_func, measures, labels,
                                             scaling_func, level)
     for i in range(len(combinations)):
-        plot_map(combinations[i][:], ax[i])
+        plot_map(scaling_func(combinations[i])[:], ax[i])
 
     for i, label in enumerate(labels):
         ax[i].set_title(label)
@@ -413,7 +422,7 @@ def plot_no_dependencies_areas(map_array, reference_series, measures, labels,
         ax[i][0].set_ylabel(label)
         ax[0][i].set_title(label)
 
-    fig.suptitle("Combination of similarity measures (Highlight no dependency are)")
+    fig.suptitle("Combination of similarity measures (Highlight no dependency areas)")
     plt.show()
 
 
@@ -510,7 +519,8 @@ def plot_std_between_similarity_measures(map_array, reference_series, measures, 
 
     #Draw Map
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
-    plot_map(agreement, ax)
+    cmap = plt.cm.get_cmap("viridis").reversed()
+    plot_map(agreement, ax, cmap=cmap)
     plt.title("Standard Deviation between {}".format(labels))
     plt.show()
 
@@ -544,7 +554,8 @@ def plot_entropy_between_similarity_measures(map_array, reference_series, measur
 
     #Draw Map
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
-    plot_map(agreement, ax)
+    cmap = plt.cm.get_cmap("viridis").reversed()
+    plot_map(agreement, ax, cmap=cmap)
     plt.title("Entropy between {}".format(labels))
     plt.show()
 
@@ -589,13 +600,15 @@ def combinations_with_pearson(map_array, reference_series, combination_func, mea
     return combinations
 
 
-def plot_map(values, axis):
+def plot_map(values, axis, cmap=plt.cm.get_cmap("viridis")):
     """
     Plot values on a Basemap map
 
     Args:
         values (numpy.ndarray): 2-d array with dimensions latitude and longitude
         axis: Axis on which the map should be displayed
+        cmap (optional): matplotlib.Colormap to use
+            Defaults to plt.cm.get_cmap("viridis")
     """
     m = Basemap(projection='mill', lon_0=30, resolution='l', ax=axis)
     m.drawcoastlines()
@@ -603,6 +616,6 @@ def plot_map(values, axis):
     x, y = m(lons, lats)
 
     #Draw similarity
-    cs = m.contourf(x, y, values)
+    cs = m.contourf(x, y, values, cmap=cmap)
     cbar = m.colorbar(cs, location='bottom', pad="5%")
     cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
