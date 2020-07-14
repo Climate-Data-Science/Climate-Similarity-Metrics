@@ -520,8 +520,17 @@ def plot_std_between_similarity_measures(map_array, reference_series, measures, 
     #Draw Map
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
     cmap = plt.cm.get_cmap("viridis").reversed()
-    plot_map(agreement, ax, cmap=cmap)
-    plt.title("Standard Deviation between {}".format(labels))
+    m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax)
+    m.drawcoastlines()
+    lons, lats = m.makegrid(512, 256)
+    x, y = m(lons, lats)
+
+    #Draw similarity
+    cs = m.contourf(x, y, agreement, cmap=cmap)
+    cbar = m.colorbar(cs, location='bottom', pad="5%")
+    cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
+    cbar.ax.invert_xaxis()
+    plt.title("Agreeableness defined with standard deviation between \n {}".format(labels))
     plt.show()
 
 
@@ -555,8 +564,17 @@ def plot_entropy_between_similarity_measures(map_array, reference_series, measur
     #Draw Map
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
     cmap = plt.cm.get_cmap("viridis").reversed()
-    plot_map(agreement, ax, cmap=cmap)
-    plt.title("Entropy between {}".format(labels))
+    m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax)
+    m.drawcoastlines()
+    lons, lats = m.makegrid(512, 256)
+    x, y = m(lons, lats)
+
+    #Draw similarity
+    cs = m.contourf(x, y, agreement, cmap=cmap)
+    cbar = m.colorbar(cs, location='bottom', pad="5%")
+    cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
+    cbar.ax.invert_xaxis()
+    plt.title("Agreeableness defined with standard deviation between \n {}".format(labels))
     plt.show()
 
 
