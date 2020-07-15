@@ -508,29 +508,47 @@ def plot_std_between_similarity_measures(map_array, reference_series, measures, 
             Defaults to 0
     """
     #Compute Standard Deviation
+    title = ["Agree high values (Top 35%)", "Agree low values (Lowest 35%)", "Not sure"]
     similarities = []
+    maps = []
     agreement = np.zeros((256, 512))
+    high_map = np.ones((256, 512))
+    low_map = np.ones ((256, 512))
+    between = np.ones((256, 512))
     for i, measure in enumerate(measures):
-        similarity = calc.calculate_series_similarity(map_array, reference_series, level, measure)
-        similarities.append(scaling_func(similarity))
-        n_measures = len(measures)
+        similarity = scaling_func(calc.calculate_series_similarity(map_array, reference_series,
+                                                                  level, measure))
+        similarities.append(similarity)
+        high_map = high_map * (similarity >= 0.65)
+        low_map = low_map * (similarity <= 0.35)
+
+    between = between * (1 - high_map)
+    between = between * (1 - low_map)
 
     agreement = np.std(similarities, axis=0)
 
-    #Draw Map
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
-    cmap = plt.cm.get_cmap("viridis").reversed()
-    m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax)
-    m.drawcoastlines()
-    lons, lats = m.makegrid(512, 256)
-    x, y = m(lons, lats)
+    maps = [high_map, low_map, between]
 
-    #Draw similarity
-    cs = m.contourf(x, y, agreement, cmap=cmap)
-    cbar = m.colorbar(cs, location='bottom', pad="5%")
-    cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
-    cbar.ax.invert_xaxis()
-    plt.title("Agreeableness defined with standard deviation between \n {}".format(labels))
+    cmap = plt.cm.get_cmap("viridis").reversed()
+
+    #Draw Map
+
+    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(32,8))
+
+    for i, map in enumerate(maps):
+        m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i])
+        m.drawcoastlines()
+        lons, lats = m.makegrid(512, 256)
+        x, y = m(lons, lats)
+
+        #Draw similarity
+        masked_agreement = np.ma.array(agreement, mask=(map == 0))
+        cs = m.contourf(x, y, masked_agreement, cmap=cmap)
+        cbar = m.colorbar(cs, location='bottom', pad="5%")
+        cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
+        cbar.ax.invert_xaxis()
+        ax[i].set_title(title[i])
+    fig.suptitle("Agreeableness defined with standard deviation between \n {}".format(labels))
     plt.show()
 
 
@@ -551,30 +569,48 @@ def plot_entropy_between_similarity_measures(map_array, reference_series, measur
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    #Compute Standard Deviation
+    #Compute Entropy
+    title = ["Agree high values (Top 35%)", "Agree low values (Lowest 35%)", "Not sure"]
     similarities = []
+    maps = []
     agreement = np.zeros((256, 512))
+    high_map = np.ones((256, 512))
+    low_map = np.ones ((256, 512))
+    between = np.ones((256, 512))
     for i, measure in enumerate(measures):
-        similarity = calc.calculate_series_similarity(map_array, reference_series, level, measure)
-        similarities.append(scaling_func(similarity))
-        n_measures = len(measures)
+        similarity = scaling_func(calc.calculate_series_similarity(map_array, reference_series,
+                                                                  level, measure))
+        similarities.append(similarity)
+        high_map = high_map * (similarity >= 0.65)
+        low_map = low_map * (similarity <= 0.35)
 
-    agreement = np.apply_along_axis(entropy, 0, similarities)
+    between = between * (1 - high_map)
+    between = between * (1 - low_map)
+
+    agreement = entropy(similarities, axis=0)
+
+    maps = [high_map, low_map, between]
+
+    cmap = plt.cm.get_cmap("viridis").reversed()
 
     #Draw Map
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
-    cmap = plt.cm.get_cmap("viridis").reversed()
-    m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax)
-    m.drawcoastlines()
-    lons, lats = m.makegrid(512, 256)
-    x, y = m(lons, lats)
 
-    #Draw similarity
-    cs = m.contourf(x, y, agreement, cmap=cmap)
-    cbar = m.colorbar(cs, location='bottom', pad="5%")
-    cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
-    cbar.ax.invert_xaxis()
-    plt.title("Agreeableness defined with standard deviation between \n {}".format(labels))
+    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(32,8))
+
+    for i, map in enumerate(maps):
+        m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i])
+        m.drawcoastlines()
+        lons, lats = m.makegrid(512, 256)
+        x, y = m(lons, lats)
+
+        #Draw similarity
+        masked_agreement = np.ma.array(agreement, mask=(map == 0))
+        cs = m.contourf(x, y, masked_agreement, cmap=cmap)
+        cbar = m.colorbar(cs, location='bottom', pad="5%")
+        cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
+        cbar.ax.invert_xaxis()
+        ax[i].set_title(title[i])
+    fig.suptitle("Agreeableness defined with standard deviation between \n {}".format(labels))
     plt.show()
 
 
