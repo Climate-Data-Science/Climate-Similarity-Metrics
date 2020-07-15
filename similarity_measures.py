@@ -25,6 +25,21 @@ def pearson_correlation(series1, series2):
     """
     return np.corrcoef([series1, series2])[0, 1]
 
+def pearson_correlation_abs(series1, series2):
+    """
+    Compute the absolute Pearson correlation coefficient between two series
+
+    Quantifies the degree of linear relationship between time series.
+
+    Args:
+        series1 (numpy.ndarray): First series
+        series2 (numpy.ndarray): Second series
+
+    Returns:
+        Pearson correlation coefficient between the two series
+    """
+    return abs(pearson_correlation(series1, series2))
+
 def spearman_correlation(series1, series2):
     """
     Compute the Spearman correlation coefficient between two series
