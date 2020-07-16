@@ -577,7 +577,7 @@ def plot_entropy_between_similarity_measures(map_array, reference_series, measur
     high_map = np.ones((256, 512))
     low_map = np.ones ((256, 512))
     between = np.ones((256, 512))
-    
+
     for i, measure in enumerate(measures):
         similarity = scaling_func(calc.calculate_series_similarity(map_array, reference_series,
                                                                   level, measure))
@@ -592,7 +592,7 @@ def plot_entropy_between_similarity_measures(map_array, reference_series, measur
 
     maps = [high_map, low_map, between]
 
-    cmap = plt.cm.get_cmap("viridis").reversed()
+    cmap = plt.cm.get_cmap("viridis")
 
     #Draw Map
 
@@ -609,7 +609,6 @@ def plot_entropy_between_similarity_measures(map_array, reference_series, measur
         cs = m.contourf(x, y, masked_agreement, cmap=cmap)
         cbar = m.colorbar(cs, location='bottom', pad="5%")
         cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
-        cbar.ax.invert_xaxis()
         ax[i].set_title(title[i])
     fig.suptitle("Agreeableness defined with standard deviation between \n {}".format(labels))
     plt.show()
