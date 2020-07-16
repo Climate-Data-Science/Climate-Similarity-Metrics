@@ -322,7 +322,7 @@ def plot_power_of_dependency(map_array, reference_series, combination_func, meas
     combinations = combinations_with_pearson(map_array, reference_series, combination_func, measures, labels,
                                              scaling_func, level)
     for i in range(len(combinations)):
-        plot_map(scaling_func(combinations[i])[:], ax[i])
+        plot_map(combinations[i][:], ax[i])
 
     for i, label in enumerate(labels):
         ax[i].set_title(label)
@@ -362,7 +362,7 @@ def plot_sign_of_correlation_strength_of_both(map_array, reference_series, combi
     combinations = combinations_with_pearson(map_array, reference_series, combination_func, measures, labels,
                                             scaling_func, level)
     for i in range(len(combinations)):
-        plot_map(scaling_func(combinations[i])[:], ax[i])
+        plot_map(combinations[i][:], ax[i])
 
     for i, label in enumerate(labels):
         ax[i].set_title(label)
@@ -533,7 +533,7 @@ def plot_std_between_similarity_measures(map_array, reference_series, measures, 
 
     #Draw Map
 
-    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(32,8))
+    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(32,14))
 
     for i, map in enumerate(maps):
         m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i])
@@ -577,6 +577,7 @@ def plot_entropy_between_similarity_measures(map_array, reference_series, measur
     high_map = np.ones((256, 512))
     low_map = np.ones ((256, 512))
     between = np.ones((256, 512))
+    
     for i, measure in enumerate(measures):
         similarity = scaling_func(calc.calculate_series_similarity(map_array, reference_series,
                                                                   level, measure))
@@ -595,7 +596,7 @@ def plot_entropy_between_similarity_measures(map_array, reference_series, measur
 
     #Draw Map
 
-    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(32,8))
+    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(32,14))
 
     for i, map in enumerate(maps):
         m = Basemap(projection='mill', lon_0=30, resolution='l', ax=ax[i])
