@@ -610,7 +610,7 @@ def plot_entropy_between_similarity_measures(map_array, reference_series, measur
         cbar = m.colorbar(cs, location='bottom', pad="5%")
         cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
         ax[i].set_title(title[i])
-    fig.suptitle("Agreeableness defined with standard deviation between \n {}".format(labels))
+    fig.suptitle("Agreeableness defined with entropy between \n {}".format(labels))
     plt.show()
 
 
