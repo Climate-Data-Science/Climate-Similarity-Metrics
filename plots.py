@@ -77,7 +77,6 @@ def plot_similarities_whole_period(map_array, reference_series, measures, labels
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    axis = None
     fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(8*len(measures), 10))
 
     for i, measure in enumerate(measures):
@@ -87,10 +86,7 @@ def plot_similarities_whole_period(map_array, reference_series, measures, labels
                                                             level,
                                                             measure)
         #Check if only one map
-        if (len(measures) == 1):
-            axis = ax
-        else:
-            axis = ax[i]
+        axis = check_axis(ax, column=i, column_count=len(measures))
 
         #Draw map
         plot_map(scaling_func(sim_whole_period), axis)
@@ -123,17 +119,12 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, measur
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    axis = None
     len_measures = len(measures)
     fig, ax = plt.subplots(figsize=(8*len_measures, 14*len_measures), nrows=12, ncols=len(measures))
 
     for month in range(len(months)):
         #Check if only one map
-        if (len_measures == 1):
-            axis = ax[month]
-        else:
-            axis = ax[month][0]
-
+        axis = check_axis(ax, row=month, column=0, row_count=len(months), column_count=len_measures)
         axis.set_ylabel(months[month])
 
         #Extract monthly values
@@ -146,20 +137,14 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, measur
                                                                 reference_series_month,
                                                                 level,
                                                                 measure)
-            if (len_measures == 1):
-                axis = ax[month]
-            else:
-                axis = ax[month][i]
+            axis = check_axis(ax, row=month, column=i, row_count=len(months), column_count=len_measures)
 
             #Plot Map
             scaled_similarity = scaling_func(similarity_month)
             plot_map(scaled_similarity, axis, colorbar=False)
 
     for i in range(len_measures):
-        if (len_measures == 1):
-            axis = ax[0]
-        else:
-            axis = ax[0][i]
+        axis = check_axis(ax, row=0, column=i, row_count=len(months), column_count=len_measures)
         axis.set_title(labels[i])
 
     fig.suptitle("Similarity between QBO and all other points 1979 - 2019 per month")
@@ -189,7 +174,6 @@ def plot_similarities_winter_only(map_array, reference_series, measures, labels,
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    axis = None
     fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(8*len(measures), 10))
 
     winter_indices = []
@@ -211,10 +195,7 @@ def plot_similarities_winter_only(map_array, reference_series, measures, labels,
                                                                    measure)
 
         #Check if only one map
-        if (len(measures) == 1):
-            axis = ax
-        else:
-            axis = ax[i]
+        axis = check_axis(ax, column=i, column_count=len(measures))
 
         #Draw map
         plot_map(scaling_func(sim_whole_period_winter), axis)
@@ -238,7 +219,6 @@ def plot_similarity_dependency(map_array, reference_series, measures, labels, le
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    axis = None
     #Compute similarities
     similarities = []
     for i, measure in enumerate(measures):
@@ -253,19 +233,14 @@ def plot_similarity_dependency(map_array, reference_series, measures, labels, le
 
     for i, measure_i in enumerate(measures):
         for j, measure_j in enumerate(measures):
-            if (len(measures) == 1):
-                axis = ax
-            else:
-                axis = ax[i][j]
+            axis = check_axis(ax, row=i, column=j, row_count=n_measures, column_count=n_measures)
             axis.scatter(similarities[j], similarities[i])
 
     for i, label in enumerate(labels):
-        if (len(measures) == 1):
-            ax.set_ylabel(label)
-            ax.set_title(label)
-        else:
-            ax[i][0].set_ylabel(label)
-            ax[0][i].set_title(label)
+        axis = check_axis(ax, row=i, column=0, row_count=n_measures, column_count=n_measures)
+        axis.set_ylabel(label)
+        axis = check_axis(ax, row=0, column=i, row_count=n_measures, column_count=n_measures)
+        axis.set_title(label)
 
     fig.suptitle("Dependency between pairs of similarity measures")
     plt.show()
@@ -293,7 +268,6 @@ def plot_similarity_measures_combinations(map_array, reference_series, combinati
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    axis = None
     #Compute similarities
     similarities = []
     for i, measure in enumerate(measures):
@@ -307,20 +281,15 @@ def plot_similarity_measures_combinations(map_array, reference_series, combinati
 
     for i in range(n_measures):
         for j in range(n_measures):
-            if (n_measures == 1):
-                axis = ax
-            else:
-                axis = ax[i][j]
             combination = calc.combine_similarity_measures(similarities[i], similarities[j], combination_func)
+            axis = check_axis(ax, row=i, column=j, row_count=n_measures, column_count=n_measures)
             plot_map(combination[:], axis)
 
     for i, label in enumerate(labels):
-        if (n_measures == 1):
-            ax.set_ylabel(label)
-            ax.set_title(label)
-        else:
-            ax[i][0].set_ylabel(label)
-            ax[0][i].set_title(label)
+        axis = check_axis(ax, row=i, column=0, row_count=n_measures, column_count=n_measures)
+        axis.set_ylabel(label)
+        axis = check_axis(ax, row=0, column=i, row_count=n_measures, column_count=n_measures)
+        axis.set_title(label)
 
     fig.suptitle("Combination of similarity measures")
     plt.show()
@@ -351,7 +320,6 @@ def plot_power_of_dependency(map_array, reference_series, combination_func, meas
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    axis = None
     fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(8 * len(measures), 8))
 
     combination_func = comb.power_combination(combination_func)
@@ -359,18 +327,9 @@ def plot_power_of_dependency(map_array, reference_series, combination_func, meas
     combinations = combinations_with_pearson(map_array, reference_series, combination_func, measures, labels,
                                              scaling_func, level)
     for i in range(len(combinations)):
-        if (len(measures) == 1):
-            axis = ax
-        else:
-            axis = ax[i]
+        axis = check_axis(ax, column=i, column_count=len(measures))
         plot_map(combinations[i][:], axis)
-
-    for i, label in enumerate(labels):
-        if (len(measures) == 1):
-            axis = ax
-        else:
-            axis = ax[i]
-        axis.set_title(label)
+        axis.set_title(labels[i])
 
     fig.suptitle("Combination with absolute values of Pearson's Correlation")
     plt.show()
@@ -400,7 +359,6 @@ def plot_sign_of_correlation_strength_of_both(map_array, reference_series, combi
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    axis = None
     fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(8 * len(measures), 8))
 
     combination_func = comb.take_sign_first_strength_both(combination_func)
@@ -408,18 +366,9 @@ def plot_sign_of_correlation_strength_of_both(map_array, reference_series, combi
     combinations = combinations_with_pearson(map_array, reference_series, combination_func, measures, labels,
                                             scaling_func, level)
     for i in range(len(combinations)):
-        if (len(measures) == 1):
-            axis = ax
-        else:
-            axis = ax[i]
+        axis = check_axis(ax, column=i, column_count=len(measures))
         plot_map(combinations[i][:], axis)
-
-    for i, label in enumerate(labels):
-        if (len(measures) == 1):
-            axis = ax
-        else:
-            axis = ax[i]
-        axis.set_title(label)
+        axis.set_title(labels[i])
 
     fig.suptitle("Sign of Pearson's and values of both combined")
     plt.show()
@@ -661,7 +610,6 @@ def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, mea
     """
     axis = None
     #Compute time delayed similarities
-    len_time = map_array.shape[0]
     len_time_shifts = len(time_shifts)
     len_measures = len(measures)
     fig, ax = plt.subplots(nrows=len_time_shifts, ncols=len_measures, figsize=(10 * len_measures, 14 * len_time_shifts))
@@ -675,45 +623,18 @@ def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, mea
             if (measure != sim.pearson_correlation or measure !=sim.pearson_correlation_abs):
                 similarity = scaling_func(similarity)
 
-            #Exceptional cases
-            if len_measures == 1:
-                if len_time_shifts == 1:
-                    axis = ax
-                else:
-                    axis = ax[j]
-            else:
-                if len_time_shifts == 1:
-                    axis = ax[i]
-                else:
-                    axis = ax[j][i]
+            #Check axis
+            axis = check_axis(ax, row=j, column=i, row_count=len_time_shifts, column_count=len_measures)
 
             #Plot results on map
             plot_map(similarity, axis)
 
     for i in range(len_measures):
-        if len_measures == 1:
-            if len_time_shifts == 1:
-                axis = ax
-            else:
-                axis = ax[0]
-        else:
-            if len_time_shifts == 1:
-                axis = ax[i]
-            else:
-                axis = ax[0][i]
+        axis = check_axis(ax, row=0, column=i, row_count=len_time_shifts, column_count=len_measures)
         axis.set_title(labels[i])
 
     for j in range(len_time_shifts):
-        if len_measures == 1:
-            if len_time_shifts == 1:
-                axis = ax
-            else:
-                axis = ax[j]
-        else:
-            if len_time_shifts == 1:
-                axis = ax[0]
-            else:
-                axis = ax[j][0]
+        axis = check_axis(ax, row=j, column=0, row_count=len_time_shifts, column_count=len_measures)
         axis.set_ylabel("Shifted by {}".format(time_shifts[j]))
 
     fig.suptitle("Similarities to different time steps")
