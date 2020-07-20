@@ -719,6 +719,55 @@ def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, mea
     fig.suptitle("Similarities to different time steps")
 
 
+def plot_similarities_to_different_datasets(datasets, dataset_labels, reference_series, measures, measure_labels,
+                                        scaling_func=comp.binning_values_to_quantiles, level=0):
+    """
+    Plot the similarities for different similarity measures between a reference series and different datasets.
+
+    The results are made comparable using the scaling_func. The results of Pearson's Correlation stay unscaled.
+
+
+    Args:
+        datasets (list): List with datasets to compute the similarity to
+        dataset_labels (list): List of labels for the datasets
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        measures (list): List of similarity measures to compute similarity between two time series
+        measure_labels (list): List of labels for the measures
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity measures comparable
+            Defaults to comp.binning_values_to_quantiles
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+    """
+    n_datasets = len(datasets)
+    len_measures = len(measures)
+    fig, ax = plt.subplots(nrows=n_datasets, ncols=len_measures, figsize=(10 * len_measures, 14 * n_datasets))
+
+    for j, file in enumerate(datasets):
+        for i, measure in enumerate(measures):
+            similarity = calc.calculate_series_similarity(file, reference_series, level, measure)
+
+            #Scale results for similarity measures different than Pearson's
+            if (measure != sim.pearson_correlation or measure !=sim.pearson_correlation_abs):
+                similarity = scaling_func(similarity)
+
+            #Check axis
+            axis = check_axis(ax, row=j, column=i, row_count=n_datasets, column_count=len_measures)
+
+            #Plot results on map
+            plot_map(similarity, axis)
+
+    for i in range(len_measures):
+        axis = check_axis(ax, row=0, column=i, row_count=n_datasets, column_count=len_measures)
+        axis.set_title(measure_labels[i])
+
+    for j in range(n_datasets):
+        axis = check_axis(ax, row=j, column=0, row_count=n_datasets, column_count=len_measures)
+        axis.set_ylabel(dataset_labels[j])
+
+    fig.suptitle("Similarities to different datasets")
+
+
 def plot_map(values, axis, cmap=plt.cm.get_cmap("viridis"), colorbar=True, invert_colorbar=False):
     """
     Plot values on a Basemap map
@@ -745,3 +794,17 @@ def plot_map(values, axis, cmap=plt.cm.get_cmap("viridis"), colorbar=True, inver
         cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
         if invert_colorbar:
             cbar.ax.invert_xaxis()
+
+def check_axis(ax, row=0, column=0, row_count=1, column_count=1):
+    axis = None
+    if row_count == 1:
+        if column_count == 1:
+            axis = ax
+        else:
+            axis = ax[column]
+    else:
+        if column_count == 1:
+            axis = ax[row]
+        else:
+            axis = ax[row][column]
+    return axis
