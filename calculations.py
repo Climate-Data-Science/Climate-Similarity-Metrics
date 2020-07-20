@@ -282,3 +282,18 @@ def combine_similarity_measures(similarities_1, similarities_2, combination_func
         2-dimensional array with the combined similarity values for each point
     """
     return combination_func(similarities_1, similarities_2)
+
+
+def shift(series, shift):
+    """
+    Shift a series by a given shift to the right.
+
+    Args:
+        series(Array): Series to shift
+        shift(int): How much to shift the series
+
+    Returns:
+        Shifted series
+    """
+    shifted_series = pd.Series(series).shift(-shift, fill_value=np.mean(series))
+    return shifted_series

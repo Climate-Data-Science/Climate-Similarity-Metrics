@@ -654,6 +654,55 @@ def combinations_with_pearson(map_array, reference_series, combination_func, mea
     return combinations
 
 
+def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, measures, labels,
+                                        scaling_func=comp.binning_values_to_quantiles, level=0):
+    """
+    Plot the similarities for different similarity measures between a reference series and the map at different time steps.
+
+    Before computing the similarity, the map is shifted by a given index and the reference series stays unchanged.
+
+    The results are made comparable using the scaling_func. The results of Pearson's Correlation stay unscaled.
+
+
+    Args:
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        time_shifts (array): List of integers that indicate by how many time units the reference series should be shifted
+        measures (list): List of similarity measures to compute similarity between two time series
+        labels (list): List of labels for the measures
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity measures comparable
+            Defaults to comp.binning_values_to_quantiles
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+    """
+    #Compute time delayed similarities
+    len_time = map_array.shape[0]
+    len_time_shifts = len(time_shifts)
+    len_measures = len(measures)
+    fig, ax = plt.subplots(nrows=len_time_shifts, ncols=len_measures, figsize=(10 * len_measures, 14 * len_time_shifts))
+
+    for j, shift in enumerate(time_shifts):
+        shifted_reference_series = calc.shift(reference_series, shift)
+        for i, measure in enumerate(measures):
+            similarity = calc.calculate_series_similarity(map_array, shifted_reference_series, level, measure)
+
+            #Scale results for similarity measures different than Pearson's
+            if (measure != sim.pearson_correlation or measure !=sim.pearson_correlation_abs):
+                similarity = scaling_func(similarity)
+
+            #Plot results on map
+            plot_map(similarity, ax[j][i])
+
+    for i in range(len_measures):
+        ax[0][i].set_title(labels[i])
+
+    for j in range(len_time_shifts):
+        ax[j][0].set_ylabel("Shifted by {}".format(time_shifts[j]))
+
+    fig.suptitle("Similarities to different time steps")
+
+
 def plot_map(values, axis, cmap=plt.cm.get_cmap("viridis")):
     """
     Plot values on a Basemap map
