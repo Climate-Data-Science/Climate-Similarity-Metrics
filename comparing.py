@@ -48,7 +48,7 @@ def equalize_histogram(map_array, num_bins=10):
 
 def min_max_normalization(map_array, a=0, b=1):
     """
-    Rescale a map of values ro range [a, b] using min-max normalization
+    Rescale a map of values to range [a, b] using min-max normalization
 
     Args:
         map_array (np.ndarray): Map with values to scale
