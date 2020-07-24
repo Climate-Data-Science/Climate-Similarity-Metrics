@@ -687,6 +687,53 @@ def plot_similarities_to_different_datasets(datasets, dataset_labels, reference_
         axis.set_ylabel(dataset_labels[j])
 
     fig.suptitle("Similarities to different datasets")
+def plot_time_delayed_similarities_to_different_datasets(datasets, dataset_labels, reference_series, time_shifts, measure,
+                                                         scaling_func=comp.binning_values_to_quantiles, level=0):
+    """
+    Plot the similarities between a reference series and different datasets delayed by different time steps.
+
+    Before computing the similarity, the dataset is shifted by a given index and the reference series stays unchanged.
+    This procedure is repeated for every index-shit (time_shifts) and for every dataset.
+
+    The results are made comparable using the scaling_func. The results of Pearson's Correlation stay unscaled.
+
+
+    Args:
+        datasets (list): List with datasets to compute the similarity to
+        dataset_labels (list): List of labels for the datasets
+        reference_series (numpy.ndarray): 1 dimensional reference series
+                time_shifts (array): List of integers that indicate by how many time units the dataset should be shifted
+        measures (function): Similarity measure to compute similarity between two time series
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity measures comparable
+            Defaults to comp.binning_values_to_quantiles
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+    """
+    n_datasets = len(datasets)
+    len_shifts = len(time_shifts)
+    fig, ax = plt.subplots(nrows=n_datasets, ncols=len_shifts, figsize=(10 * len_shifts, 14 * n_datasets))
+
+    for i, shift in enumerate(time_shifts):
+        for j, dataset in enumerate(datasets):
+            shifted_reference_series = calc.shift(reference_series, shift)
+            similarity = calc.calculate_series_similarity(dataset, shifted_reference_series, level, measure)
+
+            #Scale results for similarity measures different than Pearson's
+            if (measure != sim.pearson_correlation or measure !=sim.pearson_correlation_abs):
+                similarity = scaling_func(similarity)
+
+            #Check axis
+            axis = check_axis(ax, row=j, column=i, row_count=n_datasets, column_count=len_shifts)
+
+            #Plot results on map
+            plot_map(similarity, axis)
+
+    #Annotate rows and columns
+    shift_labels = ["Shifted by {}".format(i) for i in time_shifts]
+    annotate(ax, row_count=n_datasets, column_count=len_shifts, row_labels=dataset_labels, column_labels=shift_labels)
+
+    fig.suptitle("Similarities to different datasets for different time delays using {}".format(measure.__name__))
 
 
 def plot_map(values, axis, cmap=plt.cm.get_cmap("viridis"), colorbar=True, invert_colorbar=False):
@@ -729,3 +776,15 @@ def check_axis(ax, row=0, column=0, row_count=1, column_count=1):
         else:
             axis = ax[row][column]
     return axis
+
+
+def annotate(ax, row_count=0, column_count=0, row_labels=None, column_labels=None):
+    if column_count > 0:
+        for i in range(column_count):
+            axis = check_axis(ax, row=0, column=i, row_count=row_count, column_count=column_count)
+            axis.set_title(column_labels[i])
+
+    if row_count > 0:
+        for j in range(row_count):
+            axis = check_axis(ax, row=j, column=0, row_count=row_count, column_count=column_count)
+            axis.set_ylabel(row_labels[j])
