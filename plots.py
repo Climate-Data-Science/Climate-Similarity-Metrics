@@ -90,8 +90,8 @@ def plot_similarities_whole_period(map_array, reference_series, measures, labels
 
         #Draw map
         plot_map(scaling_func(sim_whole_period), axis)
-        axis.set_title(labels[i])
 
+    annotate(ax, column_count=len(measures), column_labels=labels)
     fig.suptitle("Similarity between QBO and all other points for the whole period")
     plt.show()
 
@@ -123,10 +123,6 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, measur
     fig, ax = plt.subplots(figsize=(8*len_measures, 14*len_measures), nrows=12, ncols=len(measures))
 
     for month in range(len(months)):
-        #Check if only one map
-        axis = check_axis(ax, row=month, column=0, row_count=len(months), column_count=len_measures)
-        axis.set_ylabel(months[month])
-
         #Extract monthly values
         map_array_month = np.array([map_array[12 * i + month, :, :, :] for i in range(40)])
         reference_series_month = [reference_series[12 * i + month] for i in range(40)]
@@ -143,10 +139,7 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, measur
             scaled_similarity = scaling_func(similarity_month)
             plot_map(scaled_similarity, axis, colorbar=False)
 
-    for i in range(len_measures):
-        axis = check_axis(ax, row=0, column=i, row_count=len(months), column_count=len_measures)
-        axis.set_title(labels[i])
-
+    annotate(ax, row_count=len(months), column_count=len_measures, row_labels=months, column_labels=labels)
     fig.suptitle("Similarity between QBO and all other points 1979 - 2019 per month")
     plt.show()
 
@@ -200,8 +193,7 @@ def plot_similarities_winter_only(map_array, reference_series, measures, labels,
         #Draw map
         plot_map(scaling_func(sim_whole_period_winter), axis)
 
-        axis.set_title(labels[i])
-
+    annotate(ax, column_count=len(measures), column_labels=labels)
     fig.suptitle("Similarity between QBO and all other points 1979 - 2019 for Winter months")
     plt.show()
 
@@ -236,12 +228,7 @@ def plot_similarity_dependency(map_array, reference_series, measures, labels, le
             axis = check_axis(ax, row=i, column=j, row_count=n_measures, column_count=n_measures)
             axis.scatter(similarities[j], similarities[i])
 
-    for i, label in enumerate(labels):
-        axis = check_axis(ax, row=i, column=0, row_count=n_measures, column_count=n_measures)
-        axis.set_ylabel(label)
-        axis = check_axis(ax, row=0, column=i, row_count=n_measures, column_count=n_measures)
-        axis.set_title(label)
-
+    annotate(ax, row_count=n_measures, column_count=n_measures, row_labels=labels, column_labels=labels)
     fig.suptitle("Dependency between pairs of similarity measures")
     plt.show()
 
@@ -285,12 +272,7 @@ def plot_similarity_measures_combinations(map_array, reference_series, combinati
             axis = check_axis(ax, row=i, column=j, row_count=n_measures, column_count=n_measures)
             plot_map(combination[:], axis)
 
-    for i, label in enumerate(labels):
-        axis = check_axis(ax, row=i, column=0, row_count=n_measures, column_count=n_measures)
-        axis.set_ylabel(label)
-        axis = check_axis(ax, row=0, column=i, row_count=n_measures, column_count=n_measures)
-        axis.set_title(label)
-
+    annotate(ax, row_count=n_measures, column_count=n_measures, row_labels=labels, column_labels=labels)
     fig.suptitle("Combination of similarity measures")
     plt.show()
 
@@ -329,8 +311,8 @@ def plot_power_of_dependency(map_array, reference_series, combination_func, meas
     for i in range(len(combinations)):
         axis = check_axis(ax, column=i, column_count=len(measures))
         plot_map(combinations[i][:], axis)
-        axis.set_title(labels[i])
 
+    annotate(ax, column_count=len(combinations), column_labels=labels)
     fig.suptitle("Combination with absolute values of Pearson's Correlation")
     plt.show()
 
@@ -368,8 +350,8 @@ def plot_sign_of_correlation_strength_of_both(map_array, reference_series, combi
     for i in range(len(combinations)):
         axis = check_axis(ax, column=i, column_count=len(measures))
         plot_map(combinations[i][:], axis)
-        axis.set_title(labels[i])
 
+    annotate(ax, column_count=len(combinations), column_labels=labels)
     fig.suptitle("Sign of Pearson's and values of both combined")
     plt.show()
 
@@ -435,17 +417,20 @@ def plot_level_of_agreement(map_array, reference_series, scoring_func, measures,
     plt.show()
 
 
-def plot_std_between_similarity_measures(map_array, reference_series, measures, labels, threshold=0.35,
-                            scaling_func=comp.binning_values_to_quantiles, level=0):
+def plot_std_between_similarity_measures(map_array, reference_series, measures, measure_labels, threshold=0.35,
+                                         scaling_func=comp.binning_values_to_quantiles, level=0):
     """
-    Plot a map with the standard deviation between all similarity values, using a list of similarity measures,
+    Plot 3 maps with the standard deviation between all similarity values, using a list of similarity measures,
     between the reference series and the time series for each point.
 
+    First map contains the points where all the similarity values have high values, second map containts the points
+    where all the similarity values have low values and the third map containts all the remaining points.
+
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
         measures (list): List of similarity measures to compute similarity between two time series
-        labels (list): List of labels for the measures
+        measure_labels (list): List of labels for the measures
         threshold (float64, optional): Percentage-Threshold to decide when a value is high, low, or between
             Defaults to 0.35 (35%)
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
@@ -454,53 +439,28 @@ def plot_std_between_similarity_measures(map_array, reference_series, measures, 
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    #Compute Standard Deviation
-    title = ["Agree high values (Top {}%)".format(threshold*100), "Agree low values (Lowest {}%)".format(threshold*100), "Not sure"]
-    similarities = []
-    maps = []
-    agreement = np.zeros((256, 512))
-    high_map = np.ones((256, 512))
-    low_map = np.ones ((256, 512))
-    between = np.ones((256, 512))
-    for i, measure in enumerate(measures):
-        similarity = scaling_func(calc.calculate_series_similarity(map_array, reference_series,
-                                                                  level, measure))
-        similarities.append(similarity)
-        high_map = high_map * (similarity >= (1 - threshold))
-        low_map = low_map * (similarity <= threshold)
-
-    between = between * (1 - high_map)
-    between = between * (1 - low_map)
-
-    agreement = np.std(similarities, axis=0)
-
-    maps = [high_map, low_map, between]
-
-    cmap = plt.cm.get_cmap("viridis").reversed()
-
-    #Draw Maps
     fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(32,14))
 
-    for i, map in enumerate(maps):
-        masked_agreement = np.ma.array(agreement, mask=(map == 0))
-        plot_map(masked_agreement, ax[i], cmap=cmap, invert_colorbar=True)
-        ax[i].set_title(title[i])
+    plot_agreement_defined_with(ax, map_array, reference_series, measures, measure_labels, np.std, inverted=True)
 
-    fig.suptitle("Agreeableness defined with standard deviation between \n {}".format(labels))
+    fig.suptitle("Agreeableness defined with entropy between \n {}".format(measure_labels))
     plt.show()
 
 
-def plot_entropy_between_similarity_measures(map_array, reference_series, measures, labels, threshold=0.35,
-                            scaling_func=comp.binning_values_to_quantiles, level=0):
+def plot_entropy_between_similarity_measures(map_array, reference_series, measures, measure_labels, threshold=0.35,
+                                             scaling_func=comp.binning_values_to_quantiles, level=0):
     """
-    Plot a map with the entropy between all similarity values, using a list of similarity measures, between
+    Plot 3 maps with the entropy between all similarity values, using a list of similarity measures, between
     the reference series and the time series for each point.
 
+    First map contains the points where all the similarity values have high values, second map containts the points
+    where all the similarity values have low values and the third map containts all the remaining points.
+
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
         measures (list): List of similarity measures to compute similarity between two time series
-        labels (list): List of labels for the measures
+        measure_labels (list): List of labels for the measures
         threshold (float64, optional): Percentage-Threshold to decide when a value is high, low, or between
             Defaults to 0.35 (35%)
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
@@ -509,7 +469,39 @@ def plot_entropy_between_similarity_measures(map_array, reference_series, measur
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    #Compute Entropy
+    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(32,14))
+
+    plot_agreement_defined_with(ax, map_array, reference_series, measures, measure_labels, entropy)
+
+    fig.suptitle("Agreeableness defined with entropy between \n {}".format(measure_labels))
+    plt.show()
+
+
+def plot_agreement_defined_with(ax, map_array, reference_series, measures, measure_labels, agreement_func, inverted=False,
+                                threshold=0.35, scaling_func=comp.binning_values_to_quantiles, level=0):
+    """
+    Plot 3 maps with the standard deviation between all similarity values, using a list of similarity measures,
+    between the reference series and the time series for each point.
+
+    First map contains the points where all the similarity values have high values, second map containts the points
+    where all the similarity values have low values and the third map containts all the remaining points.
+
+    Args:
+        ax: Axis (containing 3 subaxes) to plot the maps on
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        measures (list): List of similarity measures to compute similarity between two time series
+        measure_labels (list): List of labels for the measures
+        agreement_func (function): Function to compute the agreement between the values
+        inverted (boolean, optional): Set to True if colorbar and colormap should be inverted
+        threshold (float64, optional): Percentage-Threshold to decide when a value is high, low, or between
+            Defaults to 0.35 (35%)
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity measures comparable
+            Defaults to comp.binning_values_to_quantiles
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+    """
     title = ["Agree high values (Top {}%)".format(threshold*100), "Agree low values (Lowest {}%)".format(threshold*100), "Not sure"]
     similarities = []
     maps = []
@@ -519,8 +511,9 @@ def plot_entropy_between_similarity_measures(map_array, reference_series, measur
     between = np.ones((256, 512))
 
     for i, measure in enumerate(measures):
-        similarity = scaling_func(calc.calculate_series_similarity(map_array, reference_series,
-                                                                  level, measure))
+        similarity = calc.calculate_series_similarity(map_array, reference_series, level, measure)
+        if (measure != sim.pearson_correlation or measure !=sim.pearson_correlation_abs):
+            similarity = scaling_func(similarity)
         similarities.append(similarity)
         high_map = high_map * (similarity >= (1 - threshold))
         low_map = low_map * (similarity <= threshold)
@@ -528,22 +521,19 @@ def plot_entropy_between_similarity_measures(map_array, reference_series, measur
     between = between * (1 - high_map)
     between = between * (1 - low_map)
 
-    agreement = entropy(similarities, axis=0)
+    agreement = agreement_func(similarities, axis=0)
 
     maps = [high_map, low_map, between]
 
-    cmap = plt.cm.get_cmap("viridis")
-
-    #Draw Maps
-    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(32,14))
+    if (inverted):
+        cmap = plt.cm.get_cmap("viridis_r")
+    else:
+        cmap = plt.cm.get_cmap("viridis")
 
     for i, map in enumerate(maps):
         masked_agreement = np.ma.array(agreement, mask=(map == 0))
-        plot_map(masked_agreement, ax[i], cmap=cmap, invert_colorbar=True)
+        plot_map(masked_agreement, ax[i], cmap=cmap, invert_colorbar=inverted)
         ax[i].set_title(title[i])
-
-    fig.suptitle("Agreeableness defined with entropy between \n {}".format(labels))
-    plt.show()
 
 
 def combinations_with_pearson(map_array, reference_series, combination_func, measures, labels,
@@ -589,7 +579,7 @@ def combinations_with_pearson(map_array, reference_series, combination_func, mea
 def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, measures, labels,
                                         scaling_func=comp.binning_values_to_quantiles, level=0):
     """
-    Plot the similarities for different similarity measures between a reference series and the map at different time steps.
+    Plot the similarities for different similarity measures between a reference series and the map delayed by different time steps.
 
     Before computing the similarity, the map is shifted by a given index and the reference series stays unchanged.
 
@@ -599,7 +589,7 @@ def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, mea
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
-        time_shifts (array): List of integers that indicate by how many time units the reference series should be shifted
+        time_shifts (array): List of integers that indicate by how many time units the map should be shifted
         measures (list): List of similarity measures to compute similarity between two time series
         labels (list): List of labels for the measures
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
@@ -608,7 +598,6 @@ def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, mea
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    axis = None
     #Compute time delayed similarities
     len_time_shifts = len(time_shifts)
     len_measures = len(measures)
@@ -629,14 +618,9 @@ def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, mea
             #Plot results on map
             plot_map(similarity, axis)
 
-    for i in range(len_measures):
-        axis = check_axis(ax, row=0, column=i, row_count=len_time_shifts, column_count=len_measures)
-        axis.set_title(labels[i])
-
-    for j in range(len_time_shifts):
-        axis = check_axis(ax, row=j, column=0, row_count=len_time_shifts, column_count=len_measures)
-        axis.set_ylabel("Shifted by {}".format(time_shifts[j]))
-
+    #Annotate rows and columns
+    shift_labels = ["Shifted by {}".format(i) for i in time_shifts]
+    annotate(ax, row_count=len_time_shifts, column_count=len_measures, row_labels=shift_labels, column_labels=measure_labels)
     fig.suptitle("Similarities to different time steps")
 
 
@@ -678,15 +662,11 @@ def plot_similarities_to_different_datasets(datasets, dataset_labels, reference_
             #Plot results on map
             plot_map(similarity, axis)
 
-    for i in range(len_measures):
-        axis = check_axis(ax, row=0, column=i, row_count=n_datasets, column_count=len_measures)
-        axis.set_title(measure_labels[i])
-
-    for j in range(n_datasets):
-        axis = check_axis(ax, row=j, column=0, row_count=n_datasets, column_count=len_measures)
-        axis.set_ylabel(dataset_labels[j])
-
+    #Annotate rows and columns
+    annotate(ax, row_count=n_datasets, column_count=len_measures, row_labels=dataset_labels, column_labels=measure_labels)
     fig.suptitle("Similarities to different datasets")
+
+
 def plot_time_delayed_similarities_to_different_datasets(datasets, dataset_labels, reference_series, time_shifts, measure,
                                                          scaling_func=comp.binning_values_to_quantiles, level=0):
     """
