@@ -682,8 +682,8 @@ def plot_time_delayed_similarities_to_different_datasets(datasets, dataset_label
         datasets (list): List with datasets to compute the similarity to
         dataset_labels (list): List of labels for the datasets
         reference_series (numpy.ndarray): 1 dimensional reference series
-                time_shifts (array): List of integers that indicate by how many time units the dataset should be shifted
-        measures (function): Similarity measure to compute similarity between two time series
+        time_shifts (array): List of integers that indicate by how many time units the dataset should be shifted
+        measure (function): Similarity measure to compute similarity between two time series
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
                                            to make the similarity values of different similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
@@ -714,6 +714,76 @@ def plot_time_delayed_similarities_to_different_datasets(datasets, dataset_label
     annotate(ax, row_count=n_datasets, column_count=len_shifts, row_labels=dataset_labels, column_labels=shift_labels)
 
     fig.suptitle("Similarities to different datasets for different time delays using {}".format(measure.__name__))
+
+
+def plot_time_delayed_agreeableness_to_different_datasets(datasets, dataset_labels, reference_series, time_shifts, measures,
+                                                          measure_labels, agreeableness_measure = np.std, inverted=False,
+                                                          scaling_func=comp.binning_values_to_quantiles, level=0):
+    """
+    Plot the agreeableness between similarity values between a reference series and different datasets delayed by different
+    time steps using different similarity measures.
+
+    Before computing the similarity, the dataset is shifted by a given index and the reference series stays unchanged.
+    This procedure is repeated for every index-shit (time_shifts) and for every dataset and for every similarity measure.
+    Then a degree of agreeableness between the similarity values using different similarity measures is calculated using
+    the agreeableness_measure.
+
+    Before calculating the agreeableness, the similarity values are made comparable using the scaling_func. The results of
+    Pearson's Correlation stay unscaled.
+
+
+    Args:
+        datasets (list): List with datasets to compute the similarity to
+        dataset_labels (list): List of labels for the datasets
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        time_shifts (array): List of integers that indicate by how many time units the dataset should be shifted
+        measures (list): List of similarity measures to compute similarity between two time series
+        measure_labels (list):
+        agreeableness_measure (function, optional): Agreeableness measure to compute degree of agreement between
+                                                    similarity values
+            Defaults to np.std
+        inverted (Boolean, optional): Boolean indicating if the colorbar and the colormap shoud be inverted
+            Defaults to False
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity measures comparable
+            Defaults to comp.binning_values_to_quantiles
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+    """
+    n_datasets = len(datasets)
+    len_shifts = len(time_shifts)
+    fig, ax = plt.subplots(nrows=n_datasets, ncols=len_shifts, figsize=(10 * len_shifts, 14 * n_datasets))
+
+    for i, shift in enumerate(time_shifts):
+        for j, dataset in enumerate(datasets):
+            shifted_reference_series = calc.shift(reference_series, shift)
+            similarities = []
+            for measure in measures:
+                similarity = calc.calculate_series_similarity(dataset, shifted_reference_series, level, measure)
+
+                #Scale results for similarity measures different than Pearson's
+                if (measure != sim.pearson_correlation or measure !=sim.pearson_correlation_abs):
+                    similarity = scaling_func(similarity)
+
+                similarities.append(similarity)
+
+            #Compute agreeableness
+            agreement = agreeableness_measure(similarities, axis=0)
+
+            #Check axis
+            axis = check_axis(ax, row=j, column=i, row_count=n_datasets, column_count=len_shifts)
+
+            #Plot results on map
+            if inverted:
+                plot_map(agreement, axis, cmap=plt.cm.get_cmap("viridis_r"), invert_colorbar=True)
+            else:
+                plot_map(agreement, axis)
+
+    #Annotate rows and columns
+    shift_labels = ["Shifted by {}".format(i) for i in time_shifts]
+    annotate(ax, row_count=n_datasets, column_count=len_shifts, row_labels=dataset_labels, column_labels=shift_labels)
+
+    fig.suptitle("Agreeableness between {} to different datasets for different time delays using {}".format(measure_labels, agreeableness_measure.__name__))
 
 
 def plot_map(values, axis, cmap=plt.cm.get_cmap("viridis"), colorbar=True, invert_colorbar=False):
