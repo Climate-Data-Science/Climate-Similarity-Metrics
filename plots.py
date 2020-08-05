@@ -653,20 +653,16 @@ def plot_time_delayed_similarities_to_different_datasets(datasets, dataset_label
 
 
 def plot_time_delayed_agreeableness_to_different_datasets(datasets, dataset_labels, reference_series, time_shifts, measures,
-                                                          measure_labels, agreeableness_measure = np.std, inverted=False,
+                                                          measure_labels, value_threshold, agreement_threshold, agreement_func = np.std,
+                                                          filter_values_high=True, filter_agreement_high=False,
                                                           scaling_func=comp.binning_values_to_quantiles, level=0):
     """
-    Plot the agreeableness between similarity values between a reference series and different datasets delayed by different
-    time steps using different similarity measures.
+    Plot the areas where the similarity values agree on dependency between a reference series and different datasets delayed by different
+    time steps.
 
     Before computing the similarity, the dataset is shifted by a given index and the reference series stays unchanged.
     This procedure is repeated for every index-shit (time_shifts) and for every dataset and for every similarity measure.
-    Then a degree of agreeableness between the similarity values using different similarity measures is calculated using
-    the agreeableness_measure.
-
-    Before calculating the agreeableness, the similarity values are made comparable using the scaling_func. The results of
-    Pearson's Correlation stay unscaled.
-
+    Then a degree of agreement areas between the similarity values is calculated using calc.calculate_filtered_agreement_areas.
 
     Args:
         datasets (list): List with datasets to compute the similarity to
@@ -674,11 +670,17 @@ def plot_time_delayed_agreeableness_to_different_datasets(datasets, dataset_labe
         reference_series (numpy.ndarray): 1 dimensional reference series
         time_shifts (array): List of integers that indicate by how many time units the dataset should be shifted
         measures (list): List of similarity measures to compute similarity between two time series
-        measure_labels (list):
-        agreeableness_measure (function, optional): Agreeableness measure to compute degree of agreement between
+        measure_labels (list): List of labels for the similarity measures
+        value_threshold (float): Threshold to filter the combined similarity values on
+        agreement_threshold (float): Threshold to filter the agreement between the similarity values on
+        agreement_func (function, optional): Agreeableness measure to compute degree of agreement between
                                                     similarity values
             Defaults to np.std
-        inverted (Boolean, optional): Boolean indicating if the colorbar and the colormap shoud be inverted
+        filter_values_high (Boolean, optional): Boolean indicating if combined similarity values should be
+                                                filtered high (if set to True) or low (if set to False)
+            Defaults to True
+        filter_agreement_high (Boolean, optional): Boolean indicating if agreement values should be
+                                                   filtered high (if set to True) or low (if set to False)
             Defaults to False
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
                                            to make the similarity values of different similarity measures comparable
@@ -693,33 +695,18 @@ def plot_time_delayed_agreeableness_to_different_datasets(datasets, dataset_labe
     for i, shift in enumerate(time_shifts):
         for j, dataset in enumerate(datasets):
             shifted_reference_series = calc.shift(reference_series, shift)
-            similarities = []
-            for measure in measures:
-                similarity = calc.calculate_series_similarity(dataset, shifted_reference_series, level, measure)
-
-                #Scale results for similarity measures different than Pearson's
-                if (measure != sim.pearson_correlation or measure !=sim.pearson_correlation_abs):
-                    similarity = scaling_func(similarity)
-
-                similarities.append(similarity)
-
-            #Compute agreeableness
-            agreement = agreeableness_measure(similarities, axis=0)
-
-            #Check axis
+            map = calc.calculate_filtered_agreement_areas(dataset, shifted_reference_series, measures, [value_threshold], [agreement_threshold],
+                                                          agreement_func=agreement_func, filter_values_high=filter_values_high,
+                                                          filter_agreement_high=filter_agreement_high,scaling_func=scaling_func, level=level)
             axis = check_axis(ax, row=j, column=i, row_count=n_datasets, column_count=len_shifts)
-
-            #Plot results on map
-            if inverted:
-                plot_map(agreement, axis, cmap=plt.cm.get_cmap("viridis_r"), invert_colorbar=True)
-            else:
-                plot_map(agreement, axis)
+            plot_map(map[0, 0, :, :], axis)
 
     #Annotate rows and columns
     shift_labels = ["Shifted by {}".format(i) for i in time_shifts]
     annotate(ax, row_count=n_datasets, column_count=len_shifts, row_labels=dataset_labels, column_labels=shift_labels)
 
-    fig.suptitle("Agreeableness between {} to different datasets for different time delays using {}".format(measure_labels, agreeableness_measure.__name__))
+    fig.suptitle("Agreeableness between {} to different datasets for different time delays using {} (Value threshold: {}, Agreement threshold: {})"
+       .format(measure_labels, agreement_func.__name__, value_threshold, agreement_threshold))
 
 
 def plot_map(values, axis, cmap=plt.cm.get_cmap("viridis"), colorbar=True, invert_colorbar=False):
