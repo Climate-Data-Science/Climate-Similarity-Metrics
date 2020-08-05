@@ -463,7 +463,7 @@ def plot_agreement_areas_defined_with(map_array, reference_series, measures, mea
     for i, value_threshold in enumerate(value_thresholds):
         for j, agreement_threshold in enumerate(agreement_thresholds):
             axis = check_axis(ax, row=i, column=j, row_count=n_vt, column_count=n_at)
-            plot_map(maps[i, j, :, :], axis)
+            plot_map(maps[i, j, :, :], axis, colorbar=False)
 
     row_labels = ["Value Threshold of {}".format(str(i)) for i in value_thresholds]
     column_labels = ["Agreement Threshold of {}".format(str(j)) for j in agreement_thresholds]
@@ -699,7 +699,7 @@ def plot_time_delayed_agreeableness_to_different_datasets(datasets, dataset_labe
                                                           agreement_func=agreement_func, filter_values_high=filter_values_high,
                                                           filter_agreement_high=filter_agreement_high,scaling_func=scaling_func, level=level)
             axis = check_axis(ax, row=j, column=i, row_count=n_datasets, column_count=len_shifts)
-            plot_map(map[0, 0, :, :], axis)
+            plot_map(map[0, 0, :, :], axis, colorbar=False)
 
     #Annotate rows and columns
     shift_labels = ["Shifted by {}".format(i) for i in time_shifts]

@@ -15,9 +15,12 @@ The the *u* component (east-west) of the wind for 512 longitudes, 256 latitudes,
 3. Use `era-int_pl_1979-2019-mm-u.nc` file from this [repository](https://nextcloud.scc.kit.edu/s/cwpp3wdQPcm96jq) for the "Data Preprocessing" step
 
 ##  Data Preprocessing
-Use the data manipulation tool cdo to extract all values for pressure level 30 hPa with the following command:
+Use the data manipulation tool cdo to extract all values for pressure level 3, 30, 70 and 300 hPa.
+Example for extracting values for pressure level 30 with the following command:
 
 `cdo -select,level=30 era-int_pl_1979-2019-mm-u.nc era-int_pl_1979-2019-mm-l30-u.nc`
+
+Analogously for 3, 70 and 300
 
 ## Environment Setup
 
