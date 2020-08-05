@@ -5,7 +5,7 @@
 import numpy as np
 import pandas as pd # pylint: disable=E0401
 from joblib import Parallel, delayed # pylint: disable=E0401
-
+import comparing as comp
 import similarity_measures
 
 def calculate_pointwise_similarity(map_array, lat, lon, level=0,
@@ -297,3 +297,89 @@ def shift(series, shift):
     """
     shifted_series = pd.Series(series).shift(-shift, fill_value=np.mean(series))
     return shifted_series
+
+def calculate_filtered_agreement_areas(map_array, reference_series, measures, value_thresholds, agreement_thresholds,
+                                       agreement_func=np.std, filter_values_high=True, filter_agreement_high=False,
+                                       scaling_func=comp.binning_values_to_quantiles, level=0):
+    """
+    Calculate the areas where the similarity measures agree on the dependencies.
+    Contains the following steps:
+        1. Compute similarity between reference series and map with every similarity measure
+        2. Combine the similarity maps into two summary maps:
+            - Combine using np.mean to get a summary value for the similarity measures
+            - Combine using agreement_func to get an agreement value for the similarity measures
+        3. Filter the maps using their respective thresholds
+        4. Return map containing ones(point has satisfied both conditions) and zeros(not satisfied at least one condition).
+        5. Repeat 3-4 for every combination of value thresholds and agreement thresholds
+
+    Before the values are combined (Step 2), they are scaled with the scaling_func to make value ranges combinable.
+    Pearson's Correlation will not be scaled.
+
+    Args:
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        measures (list): List of similarity measures to compute similarity between two time series
+        value_thresholds (List): List of thresholds to filter the combined similarity values on
+        agreement_thresholds (List): List of thresholds to filter the agreement on
+        agreement_func (function, optional): Function to compute agreement between similarity values
+            Defaults to np.std
+        filter_values_high (Boolean, optional): Boolean indicating if combined similarity values should be
+                                                filtered high (if set to True) or low (if set to False)
+            Defaults to True
+        filter_agreement_high (Boolean, optional): Boolean indicating if agreement values should be
+                                                   filtered high (if set to True) or low (if set to False)
+            Defaults to False
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity measures comparable
+            Defaults to comp.binning_values_to_quantiles
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+
+    Returns:
+        Array with the resulting agreement maps
+    """
+    maps = np.zeros((len(value_thresholds), len(agreement_thresholds), len(map_array[0,0,:,0]), len(map_array[0,0,0,:])))
+    similarities = []
+    mean_map = np.zeros(map_array[0, 0, :, :].shape)
+    agreement = np.zeros_like(mean_map)
+
+    for measure in measures:
+        similarity = calculate_series_similarity(map_array, reference_series, level, measure)
+        if (measure != similarity_measures.pearson_correlation or measure !=similarity_measures.pearson_correlation_abs):
+            similarity = scaling_func(similarity)
+        similarities.append(similarity)
+
+    agreement = agreement_func(similarities, axis=0)
+    mean_map = np.mean(similarities, axis=0)
+
+
+    for i, value_threshold in enumerate(value_thresholds):
+        for j, agreement_threshold in enumerate(agreement_thresholds):
+            map = np.ones_like(mean_map)
+
+            agreement_filtered = filter_map(agreement, agreement_threshold, high=filter_agreement_high)
+            mean_map_filtered = filter_map(mean_map, value_threshold, high=filter_values_high)
+
+            map = map * agreement_filtered * mean_map_filtered
+            maps[i, j, :, :] = map
+
+    return maps
+
+
+def filter_map(map, threshold, high=True):
+    """
+    Filter a map of values based on a threshold.
+
+    Args:
+        map (array): Array of value to be filtered
+        threshold (float): Threshold indicating which values to keep
+        high (Boolean, optional): If set to True then values >= threshold are kept,
+                                  else values < threshold are kept
+            Defaults to True
+    """
+    filtered_map = None
+    if high:
+        filtered_map = (map >= threshold)
+    else:
+        filtered_map = (map < threshold)
+    return filtered_map

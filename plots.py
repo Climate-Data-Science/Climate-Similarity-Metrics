@@ -417,123 +417,59 @@ def plot_level_of_agreement(map_array, reference_series, scoring_func, measures,
     plt.show()
 
 
-def plot_std_between_similarity_measures(map_array, reference_series, measures, measure_labels, threshold=0.35,
-                                         scaling_func=comp.binning_values_to_quantiles, level=0):
+def plot_agreement_areas_defined_with(map_array, reference_series, measures, measure_labels, agreement_func,
+                                value_thresholds, agreement_thresholds, filter_values_high=True, filter_agreement_high=False,
+                                scaling_func=comp.binning_values_to_quantiles, level=0):
     """
-    Plot 3 maps with the standard deviation between all similarity values, using a list of similarity measures,
-    between the reference series and the time series for each point.
+    Plot areas where the similarity measures agree on the dependencies.
+    Contains the following steps:
+        1. Compute similarity between reference series and map with every similarity measure
+        2. Combine the similarity maps into two summary maps:
+            - Combine using np.mean to get a summary value for the similarity measures
+            - Combine using agreement_func to get an agreement value for the similarity measures
+        3. Filter the maps using their respective thresholds
+        4. Plot map containing ones(point has satisfied both conditions) and zeros(not satisfied at least one condition).
+        5. Repeat 3-4 for every combination of value thresholds and agreement thresholds
 
-    First map contains the points where all the similarity values have high values, second map containts the points
-    where all the similarity values have low values and the third map containts all the remaining points.
+    Before the values are combined (Step 2), they are scaled with the scaling_func to make value ranges combinable.
+    Pearson's Correlation will not be scaled.
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
         reference_series (numpy.ndarray): 1 dimensional reference series
         measures (list): List of similarity measures to compute similarity between two time series
-        measure_labels (list): List of labels for the measures
-        threshold (float64, optional): Percentage-Threshold to decide when a value is high, low, or between
-            Defaults to 0.35 (35%)
+        measure_labels (List): Labels for the similarity measures
+        agreement_func (function): Function to compute agreement between similarity values
+        value_thresholds (List): List of thresholds to filter the combined similarity values on
+        agreement_thresholds (List): List of thresholds to filter the agreement on
+        filter_values_high (Boolean, optional): Boolean indicating if combined similarity values should be
+                                                filtered high (if set to True) or low (if set to False)
+            Defaults to True
+        filter_agreement_high (Boolean, optional): Boolean indicating if agreement values should be
+                                                   filtered high (if set to True) or low (if set to False)
+            Defaults to False
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
                                            to make the similarity values of different similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(32,14))
+    n_vt = len(value_thresholds)
+    n_at = len(agreement_thresholds)
+    maps = calc.calculate_filtered_agreement_areas(map_array, reference_series, measures, value_thresholds, agreement_thresholds,
+                                                   agreement_func=agreement_func, filter_values_high=filter_values_high,
+                                                   filter_agreement_high=filter_agreement_high, scaling_func=scaling_func, level=level)
+    fig, ax = plt.subplots(nrows=n_vt, ncols=n_at, figsize=(8*n_at, 8*n_vt))
+    for i, value_threshold in enumerate(value_thresholds):
+        for j, agreement_threshold in enumerate(agreement_thresholds):
+            axis = check_axis(ax, row=i, column=j, row_count=n_vt, column_count=n_at)
+            plot_map(maps[i, j, :, :], axis)
 
-    plot_agreement_defined_with(ax, map_array, reference_series, measures, measure_labels, np.std, inverted=True)
+    row_labels = ["Value Threshold of {}".format(str(i)) for i in value_thresholds]
+    column_labels = ["Agreement Threshold of {}".format(str(j)) for j in agreement_thresholds]
+    annotate(ax, row_count=n_vt, column_count=n_at, row_labels=row_labels, column_labels=column_labels)
 
-    fig.suptitle("Agreeableness defined with entropy between \n {}".format(measure_labels))
-    plt.show()
-
-
-def plot_entropy_between_similarity_measures(map_array, reference_series, measures, measure_labels, threshold=0.35,
-                                             scaling_func=comp.binning_values_to_quantiles, level=0):
-    """
-    Plot 3 maps with the entropy between all similarity values, using a list of similarity measures, between
-    the reference series and the time series for each point.
-
-    First map contains the points where all the similarity values have high values, second map containts the points
-    where all the similarity values have low values and the third map containts all the remaining points.
-
-    Args:
-        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
-        reference_series (numpy.ndarray): 1 dimensional reference series
-        measures (list): List of similarity measures to compute similarity between two time series
-        measure_labels (list): List of labels for the measures
-        threshold (float64, optional): Percentage-Threshold to decide when a value is high, low, or between
-            Defaults to 0.35 (35%)
-        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
-                                           to make the similarity values of different similarity measures comparable
-            Defaults to comp.binning_values_to_quantiles
-        level (int, optional): Level on which the similarity should be calculated
-            Defaults to 0
-    """
-    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(32,14))
-
-    plot_agreement_defined_with(ax, map_array, reference_series, measures, measure_labels, entropy)
-
-    fig.suptitle("Agreeableness defined with entropy between \n {}".format(measure_labels))
-    plt.show()
-
-
-def plot_agreement_defined_with(ax, map_array, reference_series, measures, measure_labels, agreement_func, inverted=False,
-                                threshold=0.35, scaling_func=comp.binning_values_to_quantiles, level=0):
-    """
-    Plot 3 maps with the standard deviation between all similarity values, using a list of similarity measures,
-    between the reference series and the time series for each point.
-
-    First map contains the points where all the similarity values have high values, second map containts the points
-    where all the similarity values have low values and the third map containts all the remaining points.
-
-    Args:
-        ax: Axis (containing 3 subaxes) to plot the maps on
-        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
-        reference_series (numpy.ndarray): 1 dimensional reference series
-        measures (list): List of similarity measures to compute similarity between two time series
-        measure_labels (list): List of labels for the measures
-        agreement_func (function): Function to compute the agreement between the values
-        inverted (boolean, optional): Set to True if colorbar and colormap should be inverted
-        threshold (float64, optional): Percentage-Threshold to decide when a value is high, low, or between
-            Defaults to 0.35 (35%)
-        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
-                                           to make the similarity values of different similarity measures comparable
-            Defaults to comp.binning_values_to_quantiles
-        level (int, optional): Level on which the similarity should be calculated
-            Defaults to 0
-    """
-    title = ["Agree high values (Top {}%)".format(threshold*100), "Agree low values (Lowest {}%)".format(threshold*100), "Not sure"]
-    similarities = []
-    maps = []
-    agreement = np.zeros((256, 512))
-    high_map = np.ones((256, 512))
-    low_map = np.ones ((256, 512))
-    between = np.ones((256, 512))
-
-    for i, measure in enumerate(measures):
-        similarity = calc.calculate_series_similarity(map_array, reference_series, level, measure)
-        if (measure != sim.pearson_correlation or measure !=sim.pearson_correlation_abs):
-            similarity = scaling_func(similarity)
-        similarities.append(similarity)
-        high_map = high_map * (similarity >= (1 - threshold))
-        low_map = low_map * (similarity <= threshold)
-
-    between = between * (1 - high_map)
-    between = between * (1 - low_map)
-
-    agreement = agreement_func(similarities, axis=0)
-
-    maps = [high_map, low_map, between]
-
-    if (inverted):
-        cmap = plt.cm.get_cmap("viridis_r")
-    else:
-        cmap = plt.cm.get_cmap("viridis")
-
-    for i, map in enumerate(maps):
-        masked_agreement = np.ma.array(agreement, mask=(map == 0))
-        plot_map(masked_agreement, ax[i], cmap=cmap, invert_colorbar=inverted)
-        ax[i].set_title(title[i])
+    fig.suptitle("Agreement areas between {} defined with {}".format(measure_labels, agreement_func.__name__))
 
 
 def combinations_with_pearson(map_array, reference_series, combination_func, measures, labels,
