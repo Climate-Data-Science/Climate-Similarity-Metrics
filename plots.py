@@ -751,13 +751,13 @@ def check_axis(ax, row=0, column=0, row_count=1, column_count=1):
     return axis
 
 
-def annotate(ax, row_count=0, column_count=0, row_labels=None, column_labels=None):
-    if column_count > 0:
+def annotate(ax, row_count=1, column_count=1, row_labels=None, column_labels=None):
+    if (column_count > 0) & (column_labels != None):
         for i in range(column_count):
             axis = check_axis(ax, row=0, column=i, row_count=row_count, column_count=column_count)
             axis.set_title(column_labels[i])
 
-    if row_count > 0:
+    if (row_count > 0) & (row_labels != None):
         for j in range(row_count):
             axis = check_axis(ax, row=j, column=0, row_count=row_count, column_count=column_count)
             axis.set_ylabel(row_labels[j])
