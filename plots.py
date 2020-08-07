@@ -690,7 +690,7 @@ def plot_time_delayed_agreeableness_to_different_datasets(datasets, dataset_labe
     """
     n_datasets = len(datasets)
     len_shifts = len(time_shifts)
-    fig, ax = plt.subplots(nrows=n_datasets, ncols=len_shifts, figsize=(10 * len_shifts, 14 * n_datasets))
+    fig, ax = plt.subplots(nrows=n_datasets, ncols=len_shifts, figsize=(14 * len_shifts, 10 * n_datasets))
 
     for i, shift in enumerate(time_shifts):
         for j, dataset in enumerate(datasets):

@@ -29,6 +29,14 @@ def binning_values_to_quantiles(map_array, num_bins=10):
     bins = pd.qcut(values.iloc[:, 0], num_bins, labels=False)
     return np.array((bins + 1) / num_bins).reshape(map_array.shape)
 
+def binning_to_100_bins(map_array):
+    return binning_values_to_quantiles(map_array, num_bins=100)
+
+def binning_to_1000_bins(map_array):
+    return binning_values_to_quantiles(map_array, num_bins=1000)
+
+    
+
 def equalize_histogram(map_array, num_bins=10):
     """
     Scale a map of values using histogram equalization.
