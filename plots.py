@@ -77,7 +77,7 @@ def plot_similarities_whole_period(map_array, reference_series, measures, labels
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(8*len(measures), 10))
+    fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(14*len(measures), 10))
 
     for i, measure in enumerate(measures):
         #Compute similarity
@@ -120,7 +120,7 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, measur
             Defaults to 0
     """
     len_measures = len(measures)
-    fig, ax = plt.subplots(figsize=(8*len_measures, 14*len_measures), nrows=12, ncols=len(measures))
+    fig, ax = plt.subplots(figsize=(14*len_measures, 10*len_measures), nrows=12, ncols=len(measures))
 
     for month in range(len(months)):
         #Extract monthly values
@@ -167,7 +167,7 @@ def plot_similarities_winter_only(map_array, reference_series, measures, labels,
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(8*len(measures), 10))
+    fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(14*len(measures), 10))
 
     winter_indices = []
     for i in range(40):
@@ -221,7 +221,7 @@ def plot_similarity_dependency(map_array, reference_series, measures, labels, le
 
     n_measures = len(measures)
     #Plot dependencies in matrix
-    fig, ax = plt.subplots(nrows=n_measures, ncols=n_measures, figsize=(8 * n_measures, 8 * n_measures))
+    fig, ax = plt.subplots(nrows=n_measures, ncols=n_measures, figsize=(14 * n_measures, 10 * n_measures))
 
     for i, measure_i in enumerate(measures):
         for j, measure_j in enumerate(measures):
@@ -263,7 +263,7 @@ def plot_similarity_measures_combinations(map_array, reference_series, combinati
 
     n_measures = len(measures)
     #Plot dependencies in matrix
-    fig, ax = plt.subplots(nrows=n_measures, ncols=n_measures, figsize=(8 * n_measures, 8 * n_measures))
+    fig, ax = plt.subplots(nrows=n_measures, ncols=n_measures, figsize=(14 * n_measures, 10 * n_measures))
 
 
     for i in range(n_measures):
@@ -302,7 +302,7 @@ def plot_power_of_dependency(map_array, reference_series, combination_func, meas
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(8 * len(measures), 8))
+    fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(14 * len(measures), 10))
 
     combination_func = comb.power_combination(combination_func)
 
@@ -341,7 +341,7 @@ def plot_sign_of_correlation_strength_of_both(map_array, reference_series, combi
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(8 * len(measures), 8))
+    fig, ax = plt.subplots(nrows=1, ncols=len(measures), figsize=(14 * len(measures), 10))
 
     combination_func = comb.take_sign_first_strength_both(combination_func)
 
@@ -399,7 +399,7 @@ def plot_level_of_agreement(map_array, reference_series, scoring_func, measures,
 
 
     #Draw Map
-    fig, (ax, cax) = plt.subplots(nrows=2,figsize=(12, 8),
+    fig, (ax, cax) = plt.subplots(nrows=2,figsize=(14, 10),
                   gridspec_kw={"height_ratios":[1, 0.05]})
     plot_map(agreement, ax)
 
@@ -459,7 +459,7 @@ def plot_agreement_areas_defined_with(map_array, reference_series, measures, mea
     maps = calc.calculate_filtered_agreement_areas(map_array, reference_series, measures, value_thresholds, agreement_thresholds,
                                                    agreement_func=agreement_func, filter_values_high=filter_values_high,
                                                    filter_agreement_high=filter_agreement_high, scaling_func=scaling_func, level=level)
-    fig, ax = plt.subplots(nrows=n_vt, ncols=n_at, figsize=(8*n_at, 8*n_vt))
+    fig, ax = plt.subplots(nrows=n_vt, ncols=n_at, figsize=(14*n_at, 10*n_vt))
     for i, value_threshold in enumerate(value_thresholds):
         for j, agreement_threshold in enumerate(agreement_thresholds):
             axis = check_axis(ax, row=i, column=j, row_count=n_vt, column_count=n_at)
@@ -512,7 +512,7 @@ def combinations_with_pearson(map_array, reference_series, combination_func, mea
     return combinations
 
 
-def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, measures, labels,
+def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, measures, measure_labels,
                                         scaling_func=comp.binning_values_to_quantiles, level=0):
     """
     Plot the similarities for different similarity measures between a reference series and the map delayed by different time steps.
@@ -527,7 +527,7 @@ def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, mea
         reference_series (numpy.ndarray): 1 dimensional reference series
         time_shifts (array): List of integers that indicate by how many time units the map should be shifted
         measures (list): List of similarity measures to compute similarity between two time series
-        labels (list): List of labels for the measures
+        measure_labels (list): List of labels for the measures
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
                                            to make the similarity values of different similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
@@ -537,7 +537,7 @@ def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, mea
     #Compute time delayed similarities
     len_time_shifts = len(time_shifts)
     len_measures = len(measures)
-    fig, ax = plt.subplots(nrows=len_time_shifts, ncols=len_measures, figsize=(10 * len_measures, 14 * len_time_shifts))
+    fig, ax = plt.subplots(nrows=len_time_shifts, ncols=len_measures, figsize=(14 * len_measures, 10 * len_time_shifts))
 
     for j, shift in enumerate(time_shifts):
         shifted_reference_series = calc.shift(reference_series, shift)
@@ -582,7 +582,7 @@ def plot_similarities_to_different_datasets(datasets, dataset_labels, reference_
     """
     n_datasets = len(datasets)
     len_measures = len(measures)
-    fig, ax = plt.subplots(nrows=n_datasets, ncols=len_measures, figsize=(10 * len_measures, 14 * n_datasets))
+    fig, ax = plt.subplots(nrows=n_datasets, ncols=len_measures, figsize=(14 * len_measures, 10 * n_datasets))
 
     for j, file in enumerate(datasets):
         for i, measure in enumerate(measures):
@@ -628,7 +628,7 @@ def plot_time_delayed_similarities_to_different_datasets(datasets, dataset_label
     """
     n_datasets = len(datasets)
     len_shifts = len(time_shifts)
-    fig, ax = plt.subplots(nrows=n_datasets, ncols=len_shifts, figsize=(10 * len_shifts, 14 * n_datasets))
+    fig, ax = plt.subplots(nrows=n_datasets, ncols=len_shifts, figsize=(14 * len_shifts, 10 * n_datasets))
 
     for i, shift in enumerate(time_shifts):
         for j, dataset in enumerate(datasets):
