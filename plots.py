@@ -545,7 +545,7 @@ def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, mea
             similarity = calc.calculate_series_similarity(map_array, shifted_reference_series, level, measure)
 
             #Scale results for similarity measures different than Pearson's
-            if (measure != sim.pearson_correlation or measure !=sim.pearson_correlation_abs):
+            if ((measure != sim.pearson_correlation) & (measure != sim.pearson_correlation_abs)):
                 similarity = scaling_func(similarity)
 
             #Check axis
@@ -589,7 +589,7 @@ def plot_similarities_to_different_datasets(datasets, dataset_labels, reference_
             similarity = calc.calculate_series_similarity(file, reference_series, level, measure)
 
             #Scale results for similarity measures different than Pearson's
-            if (measure != sim.pearson_correlation or measure !=sim.pearson_correlation_abs):
+            if ((measure != sim.pearson_correlation) & (measure != sim.pearson_correlation_abs)):
                 similarity = scaling_func(similarity)
 
             #Check axis
@@ -636,7 +636,7 @@ def plot_time_delayed_similarities_to_different_datasets(datasets, dataset_label
             similarity = calc.calculate_series_similarity(dataset, shifted_reference_series, level, measure)
 
             #Scale results for similarity measures different than Pearson's
-            if (measure != sim.pearson_correlation or measure !=sim.pearson_correlation_abs):
+            if ((measure != sim.pearson_correlation) & (measure != sim.pearson_correlation_abs)):
                 similarity = scaling_func(similarity)
 
             #Check axis
