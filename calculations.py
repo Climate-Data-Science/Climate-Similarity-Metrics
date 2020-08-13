@@ -383,3 +383,19 @@ def filter_map(map, threshold, high=True):
     else:
         filtered_map = (map < threshold)
     return filtered_map
+
+
+def apply_mask_on_map(map, maks):
+    """
+    Apply a binary mask on a map of values.
+
+    Args:
+        Map (array): Map containing values
+        Mask (array): Array containing ones for the points to keep and zeros for the points to drop
+
+    Returns:
+        Masked map
+    """
+    map_array = np.ndarray(map)
+    mask_array = np.ndarray(mask)
+    return mask_array * map_array
