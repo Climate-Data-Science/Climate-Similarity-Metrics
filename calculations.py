@@ -345,6 +345,7 @@ def calculate_filtered_agreement_areas(map_array, reference_series, measures, va
 
     for measure in measures:
         similarity = calculate_series_similarity(map_array, reference_series, level, measure)
+        similarity = scaling_func(similarity)
         similarities.append(similarity)
 
     agreement = agreement_func(similarities, axis=0)
