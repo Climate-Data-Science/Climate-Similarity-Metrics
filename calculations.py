@@ -283,9 +283,12 @@ def combine_similarity_measures(similarities_1, similarities_2, combination_func
     """
     return combination_func(similarities_1, similarities_2)
 
-def calculate_filtered_agreement_areas(map_array, reference_series, measures, value_thresholds, agreement_thresholds,
-                                       agreement_func=np.std, filter_values_high=True, filter_agreement_high=False,
-                                       scaling_func=comp.binning_values_to_quantiles, level=0):
+
+def calculate_filtered_agreement_areas_threshold_combinations(map_array, reference_series, measures, value_thresholds,
+                                                              agreement_thresholds, combination_func=np.mean,
+                                                              agreement_func=np.std, filter_values_high=True,
+                                                              filter_agreement_high=False,
+                                                              scaling_func=comp.binning_values_to_quantiles, level=0):
     """
     Calculate the areas where the similarity measures agree on the dependencies.
     Contains the following steps:
@@ -298,7 +301,6 @@ def calculate_filtered_agreement_areas(map_array, reference_series, measures, va
         5. Repeat 3-4 for every combination of value thresholds and agreement thresholds
 
     Before the values are combined (Step 2), they are scaled with the scaling_func to make value ranges combinable.
-    Pearson's Correlation will not be scaled.
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
@@ -306,6 +308,8 @@ def calculate_filtered_agreement_areas(map_array, reference_series, measures, va
         measures (list): List of similarity measures to compute similarity between two time series
         value_thresholds (List): List of thresholds to filter the combined similarity values on
         agreement_thresholds (List): List of thresholds to filter the agreement on
+        combination_func (function, optional): Function to compute the combined value between similarity measures
+            Defaults to np.mean
         agreement_func (function, optional): Function to compute agreement between similarity values
             Defaults to np.std
         filter_values_high (Boolean, optional): Boolean indicating if combined similarity values should be
@@ -321,7 +325,7 @@ def calculate_filtered_agreement_areas(map_array, reference_series, measures, va
             Defaults to 0
 
     Returns:
-        Array with the resulting agreement maps
+        Array with the resulting agreement maps with the following dimensions (value_threshold, agreement_threshold, latitude, longitude)
     """
     maps = np.zeros((len(value_thresholds), len(agreement_thresholds), len(map_array[0,0,:,0]), len(map_array[0,0,0,:])))
     similarities = []
@@ -334,7 +338,7 @@ def calculate_filtered_agreement_areas(map_array, reference_series, measures, va
         similarities.append(similarity)
 
     agreement = agreement_func(similarities, axis=0)
-    mean_map = np.mean(similarities, axis=0)
+    mean_map = combination_func(similarities, axis=0)
 
 
     for i, value_threshold in enumerate(value_thresholds):
@@ -348,6 +352,68 @@ def calculate_filtered_agreement_areas(map_array, reference_series, measures, va
             maps[i, j, :, :] = map
 
     return maps
+
+
+def calculate_filtered_agreement_areas(map_array, reference_series, measures, value_threshold, agreement_threshold,
+                                       combination_func=np.mean, agreement_func=np.std, filter_values_high=True,
+                                       filter_agreement_high=False, scaling_func=comp.binning_values_to_quantiles,
+                                       level=0):
+    """
+    Calculate the areas where the similarity measures agree on the dependencies.
+    Contains the following steps:
+        1. Compute similarity between reference series and map with every similarity measure
+        2. Combine the similarity maps into two summary maps:
+            - Combine using np.mean to get a summary value for the similarity measures
+            - Combine using agreement_func to get an agreement value for the similarity measures
+        3. Filter the maps using their respective thresholds
+        4. Return map containing ones(point has satisfied both conditions) and zeros(not satisfied at least one condition).
+
+    Before the values are combined (Step 2), they are scaled with the scaling_func to make value ranges combinable.
+
+    Args:
+        map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
+        reference_series (numpy.ndarray): 1 dimensional reference series
+        measures (list): List of similarity measures to compute similarity between two time series
+        value_threshold (Float): Threshold to filter the combined similarity values on
+        agreement_threshold (Float): Threshold to filter the agreement on
+        combination_func (function, optional): Function to compute the combined value between similarity measures
+            Defaults to np.mean
+        agreement_func (function, optional): Function to compute agreement between similarity values
+            Defaults to np.std
+        filter_values_high (Boolean, optional): Boolean indicating if combined similarity values should be
+                                                filtered high (if set to True) or low (if set to False)
+            Defaults to True
+        filter_agreement_high (Boolean, optional): Boolean indicating if agreement values should be
+                                                   filtered high (if set to True) or low (if set to False)
+            Defaults to False
+        scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
+                                           to make the similarity values of different similarity measures comparable
+            Defaults to comp.binning_values_to_quantiles
+        level (int, optional): Level on which the similarity should be calculated
+            Defaults to 0
+
+    Returns:
+        Agreement map containing ones (points that satisfy conditions) and
+        zeros (points that don't satisfy at least one condition)
+    """
+    similarities = []
+    mean_map = np.zeros(map_array[0, 0, :, :].shape)
+    agreement = np.zeros_like(mean_map)
+
+    for measure in measures:
+        similarity = calculate_series_similarity(map_array, reference_series, level, measure)
+        similarity = scaling_func(similarity)
+        similarities.append(similarity)
+
+    agreement = agreement_func(similarities, axis=0)
+    mean_map = combination_func(similarities, axis=0)
+
+    map = np.ones_like(mean_map)
+    agreement_filtered = filter_map(agreement, agreement_threshold, high=filter_agreement_high)
+    mean_map_filtered = filter_map(mean_map, value_threshold, high=filter_values_high)
+    map = map * agreement_filtered * mean_map_filtered
+
+    return map
 
 
 def filter_map(map, threshold, high=True):
@@ -369,7 +435,7 @@ def filter_map(map, threshold, high=True):
     return filtered_map
 
 
-def apply_mask_on_map(map, maks):
+def apply_mask_on_map(map, mask):
     """
     Apply a binary mask on a map of values.
 
@@ -380,6 +446,6 @@ def apply_mask_on_map(map, maks):
     Returns:
         Masked map
     """
-    map_array = np.ndarray(map)
-    mask_array = np.ndarray(mask)
-    return mask_array * map_array
+    map_array = np.array(map)
+    mask_array = np.array(mask)
+    return np.ma.masked_array(map_array, np.logical_not(mask_array))

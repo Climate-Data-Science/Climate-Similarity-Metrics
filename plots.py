@@ -456,9 +456,11 @@ def plot_agreement_areas_defined_with(map_array, reference_series, measures, mea
     """
     n_vt = len(value_thresholds)
     n_at = len(agreement_thresholds)
-    maps = calc.calculate_filtered_agreement_areas(map_array, reference_series, measures, value_thresholds, agreement_thresholds,
-                                                   agreement_func=agreement_func, filter_values_high=filter_values_high,
-                                                   filter_agreement_high=filter_agreement_high, scaling_func=scaling_func, level=level)
+    maps = calc.calculate_filtered_agreement_areas_threshold_combinations(map_array, reference_series, measures, value_thresholds,
+                                                                          agreement_thresholds, agreement_func=agreement_func,
+                                                                          filter_values_high=filter_values_high,
+                                                                          filter_agreement_high=filter_agreement_high,
+                                                                          scaling_func=scaling_func, level=level)
     fig, ax = plt.subplots(nrows=n_vt, ncols=n_at, figsize=(14*n_at, 10*n_vt))
     for i, value_threshold in enumerate(value_thresholds):
         for j, agreement_threshold in enumerate(agreement_thresholds):
@@ -706,11 +708,11 @@ def plot_time_delayed_agreeableness_to_different_datasets(datasets, dataset_labe
             if shift > 0:
                 short_reference_series = reference_series[:-shift]
                 shifted_dataset = dataset[shift:, :,:,:]
-            map = calc.calculate_filtered_agreement_areas(shifted_dataset, short_reference_series, measures, [value_threshold], [agreement_threshold],
+            map = calc.calculate_filtered_agreement_areas(shifted_dataset, short_reference_series, measures, value_threshold, agreement_threshold,
                                                           agreement_func=agreement_func, filter_values_high=filter_values_high,
                                                           filter_agreement_high=filter_agreement_high,scaling_func=scaling_func, level=level)
             axis = check_axis(ax, row=j, column=i, row_count=n_datasets, column_count=len_shifts)
-            plot_map(map[0, 0, :, :], axis, colorbar=False)
+            plot_map(map, axis, colorbar=False)
 
     #Annotate rows and columns
     shift_labels = ["Shifted by {}".format(i) for i in time_shifts]
@@ -720,7 +722,8 @@ def plot_time_delayed_agreeableness_to_different_datasets(datasets, dataset_labe
        .format(measure_labels, agreement_func.__name__, value_threshold, agreement_threshold))
 
 
-def plot_map(values, axis, cmap=plt.cm.get_cmap("viridis"), colorbar=True, invert_colorbar=False):
+def plot_map(values, axis, cmap=plt.cm.get_cmap("viridis"), colorbar=True, invert_colorbar=False,
+             overwrite_colorbar_boundaries=False, colorbar_min=0, colorbar_max=1):
     """
     Plot values on a Basemap map
 
@@ -732,7 +735,20 @@ def plot_map(values, axis, cmap=plt.cm.get_cmap("viridis"), colorbar=True, inver
         colorbar (boolean, optional): Boolean indicating if a colorbar should be plotted
             Defaults to True
         invert_colorbar (boolean, optional): Boolean indicating if the colobar should be inverted
+        overwrite_colorbar_boundaries (boolean, optional): Boolean indicating if the colorbar
+                                                           boundaries should be overwritten
+            Defaults to False
+        colorbar_min (int, optional): Minimum value for colorbar (if colorbar is overwritten)
+            Defaults to 0
+        colorbar_max (int, optional): Maximum value for colorbar (if colorbar is overwritte)
+            Defaults to 1
     """
+    #Create Colormap
+    vmin = np.min(values)
+    vmax = np.max(values)
+    if overwrite_colorbar_boundaries:
+        vmin = colorbar_min
+        vmax = colorbar_max
     #Create map
     m = Basemap(projection='mill', lon_0=30, resolution='l', ax=axis)
     m.drawcoastlines()
@@ -740,10 +756,11 @@ def plot_map(values, axis, cmap=plt.cm.get_cmap("viridis"), colorbar=True, inver
     x, y = m(lons, lats)
 
     #Draw values in map
-    cs = m.contourf(x, y, values, cmap=cmap)
+    cs = m.contourf(x, y, values, cmap=cmap, vmin=vmin, vmax=vmax)
     if colorbar:
+        #Create Colorbar
         cbar = m.colorbar(cs, location='bottom', pad="5%")
-        cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
+        #cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=45)
         if invert_colorbar:
             cbar.ax.invert_xaxis()
 
