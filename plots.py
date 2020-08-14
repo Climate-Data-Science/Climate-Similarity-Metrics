@@ -537,12 +537,16 @@ def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, mea
     #Compute time delayed similarities
     len_time_shifts = len(time_shifts)
     len_measures = len(measures)
+    shifted_map = map_array
+    short_reference_series = reference_series
     fig, ax = plt.subplots(nrows=len_time_shifts, ncols=len_measures, figsize=(14 * len_measures, 10 * len_time_shifts))
 
     for j, shift in enumerate(time_shifts):
-        shifted_reference_series = calc.shift(reference_series, shift)
+        if shift > 0:
+            short_reference_series = reference_series[:-shift]
+            shifted_map = map_array[shift:, :,:,:]
         for i, measure in enumerate(measures):
-            similarity = calc.calculate_series_similarity(map_array, shifted_reference_series, level, measure)
+            similarity = calc.calculate_series_similarity(shifted_map, short_reference_series, level, measure)
 
             #Scale results for similarity measures different than Pearson's
             if ((measure != sim.pearson_correlation) & (measure != sim.pearson_correlation_abs)):
@@ -558,7 +562,6 @@ def plot_time_delayed_dependencies(map_array, reference_series, time_shifts, mea
     shift_labels = ["Shifted by {}".format(i) for i in time_shifts]
     annotate(ax, row_count=len_time_shifts, column_count=len_measures, row_labels=shift_labels, column_labels=measure_labels)
     fig.suptitle("Similarities to different time steps")
-
 
 def plot_similarities_to_different_datasets(datasets, dataset_labels, reference_series, measures, measure_labels,
                                         scaling_func=comp.binning_values_to_quantiles, level=0):
@@ -628,12 +631,16 @@ def plot_time_delayed_similarities_to_different_datasets(datasets, dataset_label
     """
     n_datasets = len(datasets)
     len_shifts = len(time_shifts)
+    short_reference_series = reference_series
     fig, ax = plt.subplots(nrows=n_datasets, ncols=len_shifts, figsize=(14 * len_shifts, 10 * n_datasets))
 
     for i, shift in enumerate(time_shifts):
         for j, dataset in enumerate(datasets):
-            shifted_reference_series = calc.shift(reference_series, shift)
-            similarity = calc.calculate_series_similarity(dataset, shifted_reference_series, level, measure)
+            shifted_dataset = dataset
+            if shift > 0:
+                short_reference_series = reference_series[:-shift]
+                shifted_dataset = dataset[shift:, :,:,:]
+            similarity = calc.calculate_series_similarity(shifted_dataset, short_reference_series, level, measure)
 
             #Scale results for similarity measures different than Pearson's
             if ((measure != sim.pearson_correlation) & (measure != sim.pearson_correlation_abs)):
@@ -690,12 +697,16 @@ def plot_time_delayed_agreeableness_to_different_datasets(datasets, dataset_labe
     """
     n_datasets = len(datasets)
     len_shifts = len(time_shifts)
+    short_reference_series = reference_series
     fig, ax = plt.subplots(nrows=n_datasets, ncols=len_shifts, figsize=(14 * len_shifts, 10 * n_datasets))
 
     for i, shift in enumerate(time_shifts):
         for j, dataset in enumerate(datasets):
-            shifted_reference_series = calc.shift(reference_series, shift)
-            map = calc.calculate_filtered_agreement_areas(dataset, shifted_reference_series, measures, [value_threshold], [agreement_threshold],
+            shifted_dataset = dataset
+            if shift > 0:
+                short_reference_series = reference_series[:-shift]
+                shifted_dataset = dataset[shift:, :,:,:]
+            map = calc.calculate_filtered_agreement_areas(shifted_dataset, short_reference_series, measures, [value_threshold], [agreement_threshold],
                                                           agreement_func=agreement_func, filter_values_high=filter_values_high,
                                                           filter_agreement_high=filter_agreement_high,scaling_func=scaling_func, level=level)
             axis = check_axis(ax, row=j, column=i, row_count=n_datasets, column_count=len_shifts)

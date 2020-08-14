@@ -283,21 +283,6 @@ def combine_similarity_measures(similarities_1, similarities_2, combination_func
     """
     return combination_func(similarities_1, similarities_2)
 
-
-def shift(series, shift):
-    """
-    Shift a series by a given shift to the right.
-
-    Args:
-        series(Array): Series to shift
-        shift(int): How much to shift the series
-
-    Returns:
-        Shifted series
-    """
-    shifted_series = pd.Series(series).shift(-shift, fill_value=np.mean(series))
-    return shifted_series
-
 def calculate_filtered_agreement_areas(map_array, reference_series, measures, value_thresholds, agreement_thresholds,
                                        agreement_func=np.std, filter_values_high=True, filter_agreement_high=False,
                                        scaling_func=comp.binning_values_to_quantiles, level=0):
