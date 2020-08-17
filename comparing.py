@@ -7,6 +7,10 @@ import pandas as pd
 import numpy as np
 from skimage import exposure
 
+#No scaling
+def identity(map_array):
+    return map_array
+
 #Comparing functions
 def binning_values_to_quantiles(map_array, num_bins=10):
     """
@@ -35,7 +39,7 @@ def binning_to_100_bins(map_array):
 def binning_to_1000_bins(map_array):
     return binning_values_to_quantiles(map_array, num_bins=1000)
 
-    
+
 
 def equalize_histogram(map_array, num_bins=10):
     """
