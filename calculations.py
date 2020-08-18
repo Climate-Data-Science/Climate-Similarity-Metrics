@@ -266,24 +266,6 @@ def convert_coordinates_to_grid(geo_coordinates, value):
     return gridpoint
 
 
-def combine_similarity_measures(similarities_1, similarities_2, combination_func):
-    """
-    Combine two similarity values into one
-
-    Args:
-        similarities_1 (np.ndarray): Map with 2 dimensions - latitude, longitude
-                                    - containing similarity values for each point
-        similarities_2 (np.ndarray): Map with 2 dimensions - latitude, longitude
-                                    - containing similarity values for each point
-        combination_func (function): Function that takes two similarity values and combines
-                                     them to one
-
-    Returns:
-        2-dimensional array with the combined similarity values for each point
-    """
-    return combination_func(similarities_1, similarities_2)
-
-
 def calculate_filtered_agreement_areas_threshold_combinations(map_array, reference_series, measures, value_thresholds,
                                                               agreement_thresholds, combination_func=np.mean,
                                                               agreement_func=np.std, filter_values_high=True,

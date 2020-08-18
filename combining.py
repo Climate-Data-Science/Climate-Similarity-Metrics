@@ -4,69 +4,53 @@ Module containing different functions to combine results of similarity measures.
 All functions take in two numpy.ndarray and return one numpy.ndarray
 """
 import numpy as np
+from scipy.stats import entropy
 
 #Combination functions
-def sum(x, y):
-    return x + y
+def sum(list_of_maps):
+    return np.sum(list_of_maps, axis=0)
 
-def mult(x, y):
-    return x * y
+def mult(list_of_maps):
+    result = np.ones_like(list_of_maps[0])
+    for i in range(len(list_of_maps)):
+        result = np.multiply(result, list_of_maps[i])
+    return result
 
-def max(x, y):
-    return np.maximum(x, y)
+def max(list_of_maps):
+    return np.max(list_of_maps, axis=0)
 
-def mean(x, y):
-    return (x + y) / 2
+def mean(list_of_maps):
+    return np.mean(list_of_maps, axis=0)
 
-def take_sign_first_value_second(x, y):
-    return sign(x) * abs(y)
+def median(list_of_maps):
+    return np.median(list_of_maps, axis=0)
 
-def take_sign_second_value_first(x, y):
-    return take_sign_first_value_second(y, x)
+def min(list_of_maps):
+    return np.min(list_of_maps, axis=0)
 
+def std(list_of_maps):
+    return np.std(list_of_maps, axis=0)
 
-#Preprocessing
-def power_combination(combination_func):
+def entropy(list_of_maps):
+    return entropy(list_of_maps)
+
+def combine_power_with_sign(combination_func, list_of_maps, sign_map):
     """
-    Returns a function that combines the absolute values using combination_func
+    Returns a function that combines a list of similarity maps by taking the sign of sign_map
+    and then combines all values in the list_of_maps by combining their absolute values with the combination_func
 
     Args:
-        combination_func (function): function that combines two numpy.ndarray into one
+        combination_func (function): function that combines a list of numpy.ndarray into one
+        list_of_maps (list): List np.ndarray
+        sign_map (np.ndarray): Array containing the sign values for every point
 
     Returns:
-        Function that combines absolute values using combination_func
+        Combination of a list of similarity maps by taking the sign of sign_map
+        and then combines all values in the list_of_maps by combining their absolute values with the combination_func
     """
-    return (lambda x, y: combination_func(abs(x), abs(y)))
-
-
-def take_sign_first_strength_both(combination_func):
-    """
-    Returns a function that combines two values by taking the sign of the first value
-    and then combines the two values by combining their absolute values with the combination_func
-
-    Args:
-        combination_func (function): function that combines two numpy.ndarray into one
-
-    Returns:
-        Function that combines two values by taking the sign of the first value
-        and combining the two absolute values with the combination_func
-    """
-    return (lambda x, y: sign(x) * combination_func(abs(x), abs(y)))
-
-
-def take_sign_second_strength_both(combination_func):
-    """
-    Returns a function that combines two values by taking the sign of the second value
-    and then combines the two values by combining their absolute values with the combination_func
-
-    Args:
-        combination_func (function): function that combines two numpy.ndarray into one
-
-    Returns:
-        Function that combines two values by taking the sign of the first value
-        and combining the two absolute values with the combination_func
-    """
-    return (lambda x, y: sign(y) * combination_func(abs(x), abs(y)))
+    strength = combination_func(list_of_maps)
+    strength_with_sign = sign(sign_map) * strength
+    return strength_with_sign
 
 
 #Help funtions
