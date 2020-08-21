@@ -120,7 +120,7 @@ def plot_similarities_whole_period_per_month(map_array, reference_series, measur
             Defaults to 0
     """
     len_measures = len(measures)
-    fig, ax = plt.subplots(figsize=(14*len_measures, 10*len_measures), nrows=12, ncols=len(measures))
+    fig, ax = plt.subplots(figsize=(14*len_measures, 10*12), nrows=12, ncols=len(measures))
 
     for month in range(len(months)):
         #Extract monthly values
@@ -233,14 +233,13 @@ def plot_similarity_dependency(map_array, reference_series, measures, labels, le
     plt.show()
 
 
-def plot_similarity_measures_combinations(map_array, reference_series, combination_func, measures, labels,
+def plot_similarity_measures_combination(map_array, reference_series, combination_func, measures, labels,
                                          scaling_func=comp.binning_values_to_quantiles, level=0):
     """
-    Plot a matrix of combinations of two similarity measures. The combination_func defines how the
+    Plot the combinations of similarity measures. The combination_func defines how the different similarity
     values are combined.
 
-    Before the values are combined, they are binned in 10% bins using
-    comparing.binning_values_to_quantiles.
+    Before the values are combined, they are scaled using the scaling_func.
 
     Args:
         map_array (numpy.ndarray): Map with 4 dimensions - time, level, latitude, longitude
@@ -674,7 +673,7 @@ def plot_map(values, axis, cmap=plt.cm.get_cmap("viridis"), colorbar=True, inver
     x, y = m(lons, lats)
 
     #Draw values in map
-    cs = m.contourf(x, y, values, cmap=cmap, vmin=vmin, vmax=vmax)
+    cs = m.contourf(x, y, np.flipud(values), cmap=cmap, vmin=vmin, vmax=vmax)
     if colorbar:
         #Create Colorbar
         cbar = m.colorbar(cs, location='bottom', pad="5%")
