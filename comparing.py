@@ -33,12 +33,19 @@ def binning_values_to_quantiles(map_array, num_bins=10):
     bins = pd.qcut(values.iloc[:, 0], num_bins, labels=False)
     return np.array((bins + 1) / num_bins).reshape(map_array.shape)
 
+
 def binning_to_100_bins(map_array):
+    """
+    Convert a map of values into 100 percentile bins using binning_values_to_quantiles.
+    """
     return binning_values_to_quantiles(map_array, num_bins=100)
 
-def binning_to_1000_bins(map_array):
-    return binning_values_to_quantiles(map_array, num_bins=1000)
 
+def binning_to_1000_bins(map_array):
+    """
+    Convert a map of values into 1000 percentile bins using binning_values_to_quantiles.
+    """
+    return binning_values_to_quantiles(map_array, num_bins=1000)
 
 
 def equalize_histogram(map_array, num_bins=10):
@@ -80,4 +87,14 @@ def min_max_normalization(map_array, a=0, b=1):
 
 #Preprocessing
 def invert(measure):
+    """
+    Invert a similarity measures by negating.
+
+    Args:
+        measures (function): Similarity measure computing the similarity
+        between two time series
+
+    Returns:
+        The inverted similarity measure.
+    """
     return (lambda x, y: - measure(x, y))

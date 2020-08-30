@@ -1,5 +1,5 @@
 """
-    TODO: Module Docstring
+Module for visualizations of the similarity and agreeablness computation results.
 """
 import matplotlib.pyplot as plt
 import matplotlib
@@ -357,7 +357,7 @@ def plot_level_of_agreement(map_array, reference_series, scoring_func, measures,
     #Draw Map
     fig, (ax, cax) = plt.subplots(nrows=2,figsize=(14, 10),
                   gridspec_kw={"height_ratios":[1, 0.05]})
-    plot_map(agreement, ax)
+    plot_map(agreement, ax, colorbar=False)
 
     #Draw Colorbar
     cmap = matplotlib.cm.viridis
@@ -681,7 +681,28 @@ def plot_map(values, axis, cmap=plt.cm.get_cmap("viridis"), colorbar=True, inver
         if invert_colorbar:
             cbar.ax.invert_xaxis()
 
+
 def check_axis(ax, row=0, column=0, row_count=1, column_count=1):
+    """
+    Select the axis of a subplot.
+
+    As the Axis object of the figure can have 0, 1 or 2 dimensions, the correct
+    indexation has to be used.
+
+    Args:
+        ax (Axis object): Axis of the figure from which we want to select a subplot
+        row (int, optional): Rownumber of the subplot
+            Defaults to 0
+        column (int, optional): Columnnumber of the subplot
+            Defaults to 0
+        row_count (int, optional): Number of rows the figure has
+            Defaults to 1
+        column_count (int, optional): Number of columns the figure has
+            Defaults to 1
+
+    Returns:
+        Axis of the selected subplot
+    """
     axis = None
     if row_count == 1:
         if column_count == 1:
@@ -697,6 +718,20 @@ def check_axis(ax, row=0, column=0, row_count=1, column_count=1):
 
 
 def annotate(ax, row_count=1, column_count=1, row_labels=None, column_labels=None):
+    """
+    Annotate a matrix op maps with labels for the columns and labels for the rows.
+
+    Args:
+        ax (Axis object): Axis of the figure which is to annotate
+        row_count (int, optional): Number of rows in the matrix
+            Defaults to 1
+        column_count (int, optional): Number of columns in the matrix
+            Defaults to 1
+        row_labels (List, optional): List with labels for the rows
+            Defaults to None
+        column_labels (List, optional): List with labels for the columns
+            Defaults to None
+    """
     if (column_count > 0) & (column_labels != None):
         for i in range(column_count):
             axis = check_axis(ax, row=0, column=i, row_count=row_count, column_count=column_count)

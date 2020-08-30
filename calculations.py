@@ -1,5 +1,5 @@
 """
-    TODO: Module Docstring
+Module for the similarity and agreeableness computation between time series similarity measures.
 """
 
 import numpy as np
