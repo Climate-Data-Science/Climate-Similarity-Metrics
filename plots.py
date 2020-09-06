@@ -373,19 +373,20 @@ def plot_level_of_agreement(map_array, reference_series, scoring_func, measures,
     plt.show()
 
 
-def plot_agreement_areas_defined_with(map_array, reference_series, measures, measure_labels, agreement_func,
-                                value_thresholds, agreement_thresholds, filter_values_high=True, filter_agreement_high=False,
+def plot_agreement_areas_defined_with(map_array, reference_series, measures, measure_labels, strength_thresholds,
+                                agreement_thresholds, strength_func=comb.mean, agreement_func=comb.std,
+                                filter_strengths_high=True, filter_agreement_high=True,
                                 scaling_func=comp.binning_values_to_quantiles, level=0):
     """
     Plot areas where the similarity measures agree on the dependencies.
     Contains the following steps:
         1. Compute similarity between reference series and map with every similarity measure
         2. Combine the similarity maps into two summary maps:
-            - Combine using np.mean to get a summary value for the similarity measures
+            - Combine using strenght_func to get a summary strength for the similarity measures
             - Combine using agreement_func to get an agreement value for the similarity measures
         3. Filter the maps using their respective thresholds
         4. Plot map containing ones(point has satisfied both conditions) and zeros(not satisfied at least one condition).
-        5. Repeat 3-4 for every combination of value thresholds and agreement thresholds
+        5. Repeat 3-4 for every combination of strength thresholds and agreement thresholds
 
     Before the values are combined (Step 2), they are scaled with the scaling_func to make value ranges combinable.
     Pearson's Correlation will not be scaled.
@@ -395,35 +396,39 @@ def plot_agreement_areas_defined_with(map_array, reference_series, measures, mea
         reference_series (numpy.ndarray): 1 dimensional reference series
         measures (list): List of similarity measures to compute similarity between two time series
         measure_labels (List): Labels for the similarity measures
-        agreement_func (function): Function to compute agreement between similarity values
-        value_thresholds (List): List of thresholds to filter the combined similarity values on
+        strength_thresholds (List): List of thresholds to filter the combined similarity strengths on
         agreement_thresholds (List): List of thresholds to filter the agreement on
-        filter_values_high (Boolean, optional): Boolean indicating if combined similarity values should be
+        strenght_func (function, optional): Function to compute the strength summary value between similarity values
+            Defaults to comb.mean
+        agreement_func (function): Function to compute agreement between similarity values
+            Defaults to comb.std
+        filter_strengths_high (Boolean, optional): Boolean indicating if combined similarity strengths should be
                                                 filtered high (if set to True) or low (if set to False)
             Defaults to True
         filter_agreement_high (Boolean, optional): Boolean indicating if agreement values should be
                                                    filtered high (if set to True) or low (if set to False)
-            Defaults to False
+            Defaults to True
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
                                            to make the similarity values of different similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
         level (int, optional): Level on which the similarity should be calculated
             Defaults to 0
     """
-    n_vt = len(value_thresholds)
+    n_vt = len(strength_thresholds)
     n_at = len(agreement_thresholds)
-    maps = calc.calculate_filtered_agreement_areas_threshold_combinations(map_array, reference_series, measures, value_thresholds,
-                                                                          agreement_thresholds, agreement_func=agreement_func,
-                                                                          filter_values_high=filter_values_high,
+    maps = calc.calculate_filtered_agreement_areas_threshold_combinations(map_array, reference_series, measures, strength_thresholds,
+                                                                          agreement_thresholds, strenght_func=strenght_func,
+                                                                          agreement_func=agreement_func,
+                                                                          filter_strengths_high=filter_strengths_high,
                                                                           filter_agreement_high=filter_agreement_high,
                                                                           scaling_func=scaling_func, level=level)
     fig, ax = plt.subplots(nrows=n_vt, ncols=n_at, figsize=(14*n_at, 10*n_vt))
-    for i, value_threshold in enumerate(value_thresholds):
+    for i, strength_threshold in enumerate(strength_thresholds):
         for j, agreement_threshold in enumerate(agreement_thresholds):
             axis = check_axis(ax, row=i, column=j, row_count=n_vt, column_count=n_at)
             plot_map(maps[i, j, :, :], axis, colorbar=False, cmap=plt.cm.get_cmap("Blues"))
 
-    row_labels = ["Value Threshold of {}".format(str(i)) for i in value_thresholds]
+    row_labels = ["Strength Threshold of {}".format(str(i)) for i in strength_thresholds]
     column_labels = ["Agreement Threshold of {}".format(str(j)) for j in agreement_thresholds]
     annotate(ax, row_count=n_vt, column_count=n_at, row_labels=row_labels, column_labels=column_labels)
 
@@ -579,8 +584,8 @@ def plot_time_delayed_similarities_to_different_datasets(datasets, dataset_label
 
 
 def plot_time_delayed_agreeableness_to_different_datasets(datasets, dataset_labels, reference_series, time_shifts, measures,
-                                                          measure_labels, value_threshold, agreement_threshold, agreement_func = np.std,
-                                                          filter_values_high=True, filter_agreement_high=False,
+                                                          measure_labels, strength_threshold, agreement_threshold, agreement_func = comb.std,
+                                                          strength_func = comb.mean, filter_strengths_high=True, filter_agreement_high=True,
                                                           scaling_func=comp.binning_values_to_quantiles, level=0):
     """
     Plot the areas where the similarity values agree on dependency between a reference series and different datasets delayed by different
@@ -597,17 +602,19 @@ def plot_time_delayed_agreeableness_to_different_datasets(datasets, dataset_labe
         time_shifts (array): List of integers that indicate by how many time units the dataset should be shifted
         measures (list): List of similarity measures to compute similarity between two time series
         measure_labels (list): List of labels for the similarity measures
-        value_threshold (float): Threshold to filter the combined similarity values on
+        strength_threshold (float): Threshold to filter the similarity strength on
         agreement_threshold (float): Threshold to filter the agreement between the similarity values on
         agreement_func (function, optional): Agreeableness measure to compute degree of agreement between
                                                     similarity values
-            Defaults to np.std
-        filter_values_high (Boolean, optional): Boolean indicating if combined similarity values should be
+            Defaults to comb.std
+        strength_func (function, optional): Function to compute the strength summary value for the similarity values
+            Defaults to comb.mean
+        filter_strengths_high (Boolean, optional): Boolean indicating if similarity strengths should be
                                                 filtered high (if set to True) or low (if set to False)
             Defaults to True
         filter_agreement_high (Boolean, optional): Boolean indicating if agreement values should be
                                                    filtered high (if set to True) or low (if set to False)
-            Defaults to False
+            Defaults to True
         scaling_func (function, optional): Function that takes a map of similarity values and scales them in order
                                            to make the similarity values of different similarity measures comparable
             Defaults to comp.binning_values_to_quantiles
@@ -625,8 +632,8 @@ def plot_time_delayed_agreeableness_to_different_datasets(datasets, dataset_labe
             if shift > 0:
                 short_reference_series = reference_series[:-shift]
                 shifted_dataset = dataset[shift:, :,:,:]
-            map = calc.calculate_filtered_agreement_areas(shifted_dataset, short_reference_series, measures, value_threshold, agreement_threshold,
-                                                          agreement_func=agreement_func, filter_values_high=filter_values_high,
+            map = calc.calculate_filtered_agreement_areas(shifted_dataset, short_reference_series, measures, strength_threshold, agreement_threshold,
+                                                          agreement_func=agreement_func, filter_strengths_high=filter_strengths_high,
                                                           filter_agreement_high=filter_agreement_high,scaling_func=scaling_func, level=level)
             axis = check_axis(ax, row=j, column=i, row_count=n_datasets, column_count=len_shifts)
             plot_map(map, axis, colorbar=False, cmap=plt.cm.get_cmap("Blues"))
@@ -635,8 +642,8 @@ def plot_time_delayed_agreeableness_to_different_datasets(datasets, dataset_labe
     shift_labels = ["Shifted by {}".format(i) for i in time_shifts]
     annotate(ax, row_count=n_datasets, column_count=len_shifts, row_labels=dataset_labels, column_labels=shift_labels)
 
-    fig.suptitle("Agreeableness between {} to different datasets for different time delays using {} (Value threshold: {}, Agreement threshold: {})"
-       .format(measure_labels, agreement_func.__name__, value_threshold, agreement_threshold))
+    fig.suptitle("Agreeableness between {} to different datasets for different time delays using {} (Strength threshold: {}, Agreement threshold: {})"
+       .format(measure_labels, agreement_func.__name__, strength_threshold, agreement_threshold))
 
 
 def plot_map(values, axis, cmap=plt.cm.get_cmap("viridis"), colorbar=True, invert_colorbar=False,

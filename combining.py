@@ -91,7 +91,7 @@ def min(list_of_maps):
 
 def std(list_of_maps):
     """
-    Combines a list of similarity maps into one by computing the standard
+    Combines a list of similarity maps into one by computing one minus the standard
     deviation.
 
     Args:
@@ -100,7 +100,7 @@ def std(list_of_maps):
     Returns:
         The combined similarity map
     """
-    return np.std(list_of_maps, axis=0)
+    return np.ones_like(list_of_maps[0]) - np.std(list_of_maps, axis=0)
 
 
 def entropy(list_of_maps):
