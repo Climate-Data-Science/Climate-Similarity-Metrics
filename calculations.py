@@ -277,7 +277,7 @@ def calculate_filtered_agreement_areas_threshold_combinations(map_array, referen
     Contains the following steps:
         1. Compute similarity between reference series and map with every similarity measure
         2. Combine the similarity maps into two summary maps:
-            - Combine using strenght_funcn to get a summary strength for the similarity measures
+            - Combine using strength_funcn to get a summary strength for the similarity measures
             - Combine using agreement_func to get an agreement value for the similarity measures
         3. Filter the maps using their respective thresholds
         4. Return map containing ones(point has satisfied both conditions) and zeros(not satisfied at least one condition).
@@ -308,7 +308,7 @@ def calculate_filtered_agreement_areas_threshold_combinations(map_array, referen
             Defaults to 0
 
     Returns:
-        Array with the resulting agreement maps with the following dimensions (strength_threshold, agreement_threshold, latitude, longitude)
+        Array with the resulting agreement maps with the following dimensions (agreement_threshold, strength_threshold, latitude, longitude)
     """
     maps = np.zeros((len(strength_thresholds), len(agreement_thresholds), len(map_array[0,0,:,0]), len(map_array[0,0,0,:])))
     similarities = []
@@ -324,8 +324,8 @@ def calculate_filtered_agreement_areas_threshold_combinations(map_array, referen
     strength = strength_func(similarities)
 
 
-    for i, strength_threshold in enumerate(strength_thresholds):
-        for j, agreement_threshold in enumerate(agreement_thresholds):
+    for i, agreement_threshold in enumerate(agreement_thresholds):
+        for j, strength_threshold in enumerate(strength_thresholds):
             map = np.ones_like(strength)
 
             agreement_filtered = filter_map(agreement, agreement_threshold, high=filter_agreement_high)
@@ -346,7 +346,7 @@ def calculate_filtered_agreement_areas(map_array, reference_series, measures, st
     Contains the following steps:
         1. Compute similarity between reference series and map with every similarity measure
         2. Combine the similarity maps into two summary maps:
-            - Combine using strenght_func to get a summary strength for the similarity measures
+            - Combine using strength_func to get a summary strength for the similarity measures
             - Combine using agreement_func to get an agreement value for the similarity measures
         3. Filter the maps using their respective thresholds
         4. Return map containing ones(point has satisfied both conditions) and zeros(not satisfied at least one condition).

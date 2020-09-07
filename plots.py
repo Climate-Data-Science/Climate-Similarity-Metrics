@@ -382,7 +382,7 @@ def plot_agreement_areas_defined_with(map_array, reference_series, measures, mea
     Contains the following steps:
         1. Compute similarity between reference series and map with every similarity measure
         2. Combine the similarity maps into two summary maps:
-            - Combine using strenght_func to get a summary strength for the similarity measures
+            - Combine using strength_func to get a summary strength for the similarity measures
             - Combine using agreement_func to get an agreement value for the similarity measures
         3. Filter the maps using their respective thresholds
         4. Plot map containing ones(point has satisfied both conditions) and zeros(not satisfied at least one condition).
@@ -398,7 +398,7 @@ def plot_agreement_areas_defined_with(map_array, reference_series, measures, mea
         measure_labels (List): Labels for the similarity measures
         strength_thresholds (List): List of thresholds to filter the combined similarity strengths on
         agreement_thresholds (List): List of thresholds to filter the agreement on
-        strenght_func (function, optional): Function to compute the strength summary value between similarity values
+        strength_func (function, optional): Function to compute the strength summary value between similarity values
             Defaults to comb.mean
         agreement_func (function): Function to compute agreement between similarity values
             Defaults to comb.std
@@ -417,7 +417,7 @@ def plot_agreement_areas_defined_with(map_array, reference_series, measures, mea
     n_vt = len(strength_thresholds)
     n_at = len(agreement_thresholds)
     maps = calc.calculate_filtered_agreement_areas_threshold_combinations(map_array, reference_series, measures, strength_thresholds,
-                                                                          agreement_thresholds, strenght_func=strenght_func,
+                                                                          agreement_thresholds, strength_func=strength_func,
                                                                           agreement_func=agreement_func,
                                                                           filter_strengths_high=filter_strengths_high,
                                                                           filter_agreement_high=filter_agreement_high,
@@ -428,8 +428,8 @@ def plot_agreement_areas_defined_with(map_array, reference_series, measures, mea
             axis = check_axis(ax, row=i, column=j, row_count=n_vt, column_count=n_at)
             plot_map(maps[i, j, :, :], axis, colorbar=False, cmap=plt.cm.get_cmap("Blues"))
 
-    row_labels = ["Strength Threshold of {}".format(str(i)) for i in strength_thresholds]
-    column_labels = ["Agreement Threshold of {}".format(str(j)) for j in agreement_thresholds]
+    row_labels = ["Agreement Threshold of {}".format(str(i)) for i in agreement_thresholds]
+    column_labels = ["Strength Threshold of {}".format(str(j)) for j in strength_thresholds]
     annotate(ax, row_count=n_vt, column_count=n_at, row_labels=row_labels, column_labels=column_labels)
 
     fig.suptitle("Agreement areas between {} defined with {}".format(measure_labels, agreement_func.__name__))
