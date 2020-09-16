@@ -1,5 +1,5 @@
 """
-Module for visualizations of the similarity and agreeablness computation results.
+Module for visualizations of the similarity and agreeableness computation results.
 """
 import matplotlib.pyplot as plt
 import matplotlib

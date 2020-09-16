@@ -1,6 +1,5 @@
 """
-Module containing different functions to make results of similarity measures
-comparable
+Module containing different functions to make results of similarity measures comparable.
 """
 
 import pandas as pd

@@ -1,5 +1,5 @@
 """
-Module containing different similarity measures for time series
+Module containing different similarity measures for time series.
 """
 import numpy as np
 import scipy.spatial.distance as sc
